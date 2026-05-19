@@ -4,7 +4,7 @@ import Select from 'react-select';
 import { kbliOptions } from '../dataKbliKategori';
 
 // Import untuk peta (Leaflet) & GeoJSON Desa Ploso
-import { MapContainer, TileLayer, Marker, useMapEvents, GeoJSON } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMapEvents, GeoJSON, LayersControl, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import plosoGeojson from '../3501040002_Ploso.json';
@@ -24,19 +24,36 @@ const CameraIcon = () => (
 const GalleryIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
 );
+const GPSIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
+);
+const FullscreenIcon = () => (
+  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+);
+const ExitFullscreenIcon = () => (
+  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
+);
+const DesaCantikLogo = () => (
+  <svg className="spinner-cantik" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+    <path d="M12 2v3"></path>
+    <path d="M10 4.5l2-2.5 2 2.5"></path>
+  </svg>
+);
 
-// --- KOMPONEN CUSTOM MODAL POP-UP ---
+// --- KOMPONEN CUSTOM MODAL POP-UP (Elegan & Selaras Tema) ---
 const CustomModal = ({ isOpen, title, message, type = 'info', onConfirm }) => {
   if (!isOpen) return null;
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(26,26,27,0.5)', backdropFilter: 'blur(4px)' }}>
-      <div style={{ background: '#fff', width: '90%', maxWidth: '380px', borderRadius: '12px', padding: '32px', boxShadow: '0 24px 48px rgba(0,0,0,0.15)', animation: 'slideUp 0.3s ease', textAlign: 'center' }}>
-        <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: type === 'error' ? '#fef2f2' : '#ecfdf5', color: type === 'error' ? '#ef4444' : '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto', fontSize: '28px' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 999999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(26,26,27,0.6)', backdropFilter: 'blur(4px)' }}>
+      <div style={{ background: '#fff', width: '90%', maxWidth: '380px', borderRadius: '16px', padding: '32px', boxShadow: '0 24px 48px rgba(0,0,0,0.2)', animation: 'slideUp 0.3s ease', textAlign: 'center', borderTop: `6px solid ${type === 'error' ? '#ef4444' : '#10b981'}` }}>
+        <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: type === 'error' ? '#fef2f2' : '#ecfdf5', color: type === 'error' ? '#ef4444' : '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto', fontSize: '32px' }}>
           {type === 'error' ? '✕' : '✓'}
         </div>
-        <h3 style={{ margin: '0 0 8px 0', fontSize: '20px', color: '#1a1a1b', fontWeight: 800 }}>{title}</h3>
-        <p style={{ color: '#4E4E4E', fontSize: '14px', lineHeight: 1.5, margin: '0 0 24px 0' }}>{message}</p>
-        <button onClick={onConfirm} style={{ width: '100%', padding: '14px', background: type === 'error' ? '#ef4444' : '#1a1a1b', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '15px' }}>
+        <h3 style={{ margin: '0 0 12px 0', fontSize: '22px', color: '#1a1a1b', fontWeight: 800 }}>{title}</h3>
+        <p style={{ color: '#4E4E4E', fontSize: '15px', lineHeight: 1.5, margin: '0 0 28px 0' }}>{message}</p>
+        <button onClick={onConfirm} style={{ width: '100%', padding: '14px', background: type === 'error' ? '#ef4444' : '#1a1a1b', color: '#fff', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: 700, fontSize: '15px', transition: '0.2s' }}>
           {type === 'error' ? 'Perbaiki' : 'Selesai'}
         </button>
       </div>
@@ -91,7 +108,20 @@ const customSelectStyles = {
   menuPortal: base => ({ ...base, zIndex: 9999 })
 };
 
-// Komponen interaktif untuk peta
+// --- KOMPONEN BANTUAN UNTUK PETA (Otomatis atur ukuran saat Fullscreen) ---
+function MapResizer({ isFullscreen }) {
+  const map = useMap();
+  useEffect(() => {
+    // Memicu recalculate size saat animasi transisi CSS layar penuh selesai
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [isFullscreen, map]);
+  return null;
+}
+
+// Komponen interaktif drag marker
 function LocationMarker({ position, setPosition, setFormData }) {
   const markerRef = useRef(null);
   const map = useMapEvents({
@@ -127,7 +157,9 @@ const FormKuesioner = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [listPetugas, setListPetugas] = useState([]);
   
-  // Opsi RT/RW Dinamis dari GeoJSON (Hierarkis)
+  // State Peta & Opsi RT/RW
+  const [mapRef, setMapRef] = useState(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [rwList, setRwList] = useState([]);
   const [rwToRtMap, setRwToRtMap] = useState({});
   const [selectedFeature, setSelectedFeature] = useState(null); 
@@ -151,7 +183,7 @@ const FormKuesioner = () => {
   useEffect(() => {
     setWaktuMulai(new Date().toISOString());
     
-    // Tarik list RT/RW secara Hierarkis dari file JSON
+    // Tarik list RT/RW secara Hierarkis dari file JSON GeoJSON
     if (plosoGeojson && plosoGeojson.features) {
       const mapData = {};
       plosoGeojson.features.forEach(f => {
@@ -162,18 +194,12 @@ const FormKuesioner = () => {
         if (rtMatch && rwMatch) {
           const rt = String(parseInt(rtMatch[1])).padStart(2, '0');
           const rw = String(parseInt(rwMatch[1])).padStart(2, '0');
-          
           if (!mapData[rw]) mapData[rw] = new Set();
           mapData[rw].add(rt);
         }
       });
-
-      // Ubah struktur Set menjadi Array yang tersortir
       const finalMap = {};
-      Object.keys(mapData).forEach(rw => {
-        finalMap[rw] = Array.from(mapData[rw]).sort();
-      });
-      
+      Object.keys(mapData).forEach(rw => { finalMap[rw] = Array.from(mapData[rw]).sort(); });
       setRwToRtMap(finalMap);
       setRwList(Object.keys(finalMap).sort());
     }
@@ -210,11 +236,9 @@ const FormKuesioner = () => {
     }
   }, [formData.rt, formData.rw]);
 
-  // Fungsi Modifikasi untuk Reset RT jika RW diganti
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === 'rw') {
-      // Jika merubah RW, pastikan isi RT di-reset agar tidak mengirim kombinasi invalid
       setFormData(prev => ({ ...prev, rw: value, rt: '' }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
@@ -245,11 +269,9 @@ const FormKuesioner = () => {
   const handleNibInput = (index, e) => {
     const value = e.target.value.replace(/[^0-9]/g, ''); 
     if (!value && e.target.value !== '') return; 
-
     let newNibArray = formData.nomorNib.padEnd(13, ' ').split('');
     newNibArray[index] = value || ' ';
     setFormData({ ...formData, nomorNib: newNibArray.join('').trimEnd() });
-
     if (value && index < 12) nibRefs.current[index + 1].focus();
   };
 
@@ -288,6 +310,30 @@ const FormKuesioner = () => {
   };
   const prevStep = () => setStep(prev => prev - 1);
 
+  // --- KONTROL PETA (Fokus Wilayah & GPS) ---
+  const flyToRegion = () => {
+    if (mapRef && selectedFeature) {
+      const layer = L.geoJSON(selectedFeature);
+      mapRef.flyToBounds(layer.getBounds(), { padding: [30, 30], duration: 1.5 });
+    }
+  };
+
+  const flyToGPS = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const latlng = { lat: position.coords.latitude, lng: position.coords.longitude };
+          setMapPosition(latlng);
+          setFormData(prev => ({ ...prev, lokasi: `${latlng.lat}, ${latlng.lng}` }));
+          if (mapRef) mapRef.flyTo(latlng, 17, { duration: 1.5 });
+        },
+        () => {
+          setModal({ isOpen: true, type: 'error', title: 'GPS Gagal', message: 'Gagal mendeteksi lokasi saat ini. Pastikan GPS aktif dan browser diizinkan mengakses lokasi.' });
+        }
+      );
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -296,15 +342,11 @@ const FormKuesioner = () => {
       const isInside = isPointInMultiPolygon([mapPosition.lng, mapPosition.lat], selectedFeature.geometry);
       if (!isInside) {
         setModal({
-          isOpen: true,
-          type: 'error',
-          title: 'Lokasi Tidak Sesuai Wilayah',
+          isOpen: true, type: 'error', title: 'Lokasi Tidak Sesuai Wilayah',
           message: `Titik pin peta saat ini berada di luar batas wilayah RT ${formData.rt} / RW ${formData.rw}. Harap geser pin ke dalam area yang ditandai kuning di peta.`
         });
         return; 
       }
-    } else {
-      console.warn("Batas polygon RT/RW tidak ditemukan, verifikasi dilewati.");
     }
 
     setIsLoading(true);
@@ -391,13 +433,24 @@ const FormKuesioner = () => {
         
         @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
         
-        .map-wrapper { height: 180px; width: 100%; border-radius: 8px; overflow: hidden; border: 1px solid #d1d5db; margin-bottom: 12px; z-index: 1; display: flex; position: relative; }
+        /* PETA NORMAL & FULLSCREEN */
+        .map-wrapper { height: 220px; width: 100%; border-radius: 8px; overflow: hidden; border: 1px solid #d1d5db; margin-bottom: 12px; z-index: 1; display: flex; position: relative; transition: all 0.3s ease; }
         @media(min-height: 700px) { .map-wrapper { height: 260px; } }
         
-        /* Indikator Validasi GeoJSON di Peta */
-        .map-validation-badge { position: absolute; top: 12px; left: 12px; z-index: 1000; background: rgba(255,255,255,0.9); padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; border: 1px solid #d1d5db; color: #1a1a1b; pointer-events: none; }
-        .map-validation-badge.active { border-color: #10b981; color: #059669; }
+        .map-wrapper.fullscreen { position: fixed !important; inset: 0 !important; width: 100vw !important; height: 100dvh !important; z-index: 99999 !important; border-radius: 0 !important; margin: 0 !important; }
         
+        /* Indikator Validasi GeoJSON di Peta & Tombol Bantuan */
+        .map-validation-badge { position: absolute; top: 12px; left: 12px; z-index: 1000; background: rgba(255,255,255,0.95); padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; border: 1px solid #d1d5db; color: #1a1a1b; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        .map-validation-badge.active { border-color: #10b981; color: #059669; }
+        .map-validation-badge.active:hover { background: #ecfdf5; border-color: #059669; }
+        
+        .btn-gps { position: absolute; bottom: 64px; left: 12px; z-index: 1000; background: #fff; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #d1d5db; color: #1a1a1b; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: 0.2s; }
+        .btn-gps:hover { border-color: #ffe16f; color: #d97706; }
+        .btn-gps:active { transform: scale(0.9); }
+
+        .btn-fullscreen { position: absolute; bottom: 12px; left: 12px; z-index: 1000; background: #fff; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; border: 2px solid #d1d5db; color: #1a1a1b; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: 0.2s; }
+        .btn-fullscreen:hover { background: #f9fafb; border-color: #ffe16f; }
+
         .upload-options { display: flex; gap: 8px; margin-bottom: 12px; }
         .upload-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; background: #f9fafb; border: 1px solid #d1d5db; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 13px; color: #4b5563; transition: all 0.2s; }
         .upload-btn:active { border-color: #ffe16f; background: #fff; color: #1a1a1b; }
@@ -412,14 +465,38 @@ const FormKuesioner = () => {
         .nib-box { width: 100%; height: 42px; text-align: center; font-size: 18px; font-weight: 800; border: 1px solid #d1d5db; border-radius: 6px; background: #f9fafb; outline: none; padding: 0; color: #1a1a1b; box-sizing: border-box; }
         .nib-box:focus { border-color: #ffe16f; background: #fff; box-shadow: 0 0 0 3px rgba(255, 225, 111, 0.2); }
         .nib-error { border-color: #ef4444 !important; }
+
+        /* LOADER DESA CANTIK */
+        .loader-overlay { position: fixed; inset: 0; z-index: 9999999; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); display: flex; flex-direction: column; align-items: center; justify-content: center; animation: fadeIn 0.3s ease; }
+        .spinner-cantik { width: 80px; height: 80px; color: #ffe16f; animation: spin 2.5s linear infinite, pulse 1.5s ease-in-out infinite alternate; filter: drop-shadow(0 4px 12px rgba(255, 225, 111, 0.5)); }
+        .loader-title { font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 800; color: #1a1a1b; margin: 24px 0 8px 0; letter-spacing: -0.5px; }
+        .loader-subtitle { color: #6b7280; font-size: 15px; font-weight: 500; margin: 0; animation: pulseText 1.5s infinite; }
+        
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes pulse { 0% { transform: scale(0.9); opacity: 0.8; } 100% { transform: scale(1.1); opacity: 1; } }
+        @keyframes pulseText { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
       `}</style>
 
+      {/* FULLSCREEN LOADER DESA CANTIK */}
+      {isLoading && (
+        <div className="loader-overlay">
+          <DesaCantikLogo />
+          <div className="loader-title">DESA CANTIK PLOSO</div>
+          <div className="loader-subtitle">Mensinkronisasi data ke server...</div>
+        </div>
+      )}
+
       <div className="app-container">
-        
         <CustomModal {...modal} onConfirm={closeModal} />
 
-        <div className="form-card">
-          <div className="step-badge">Tahap {step}/{totalSteps}</div>
+        <div className="form-card" style={{ transform: isFullscreen ? 'none' : '' }}>
+          
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
+            <img src="/logo.png" alt="Logo Desa Cantik" style={{ height: '42px', objectFit: 'contain' }} />
+          </div>
+
+          <div className="step-badge" style={{ top: '32px' }}>Tahap {step}/{totalSteps}</div>
           
           <div className="progress-container">
             <div className="progress-bar" style={{ width: `${(step / totalSteps) * 100}%` }}></div>
@@ -431,7 +508,12 @@ const FormKuesioner = () => {
               {step === 1 && (
                 <div style={{ animation: 'slideUp 0.3s ease' }}>
                   <h2 className="step-title">Mulai Pendataan</h2>
-                  <p className="step-desc">Pilih nama Anda sebagai petugas agen desa Kelurahan Ploso.</p>
+                  <p className="step-desc">
+                    Pilih nama Anda sebagai petugas agen statistik
+                    <span style={{ backgroundColor: '#ffe16f', color: '#1a1a1b', padding: '2px 6px', borderRadius: '4px', fontWeight: '600' }}>
+                    Kelurahan Ploso
+                    </span>
+                  </p>
                   <div className="input-group">
                     <label>Nama Petugas</label>
                     <select name="namaPetugas" value={formData.namaPetugas} onChange={handleChange} required className="pintarly-input" style={{ backgroundColor: '#fff' }}>
@@ -645,14 +727,54 @@ const FormKuesioner = () => {
                   <h2 className="step-title">Titik Lokasi Geografis</h2>
                   <p className="step-desc">Pastikan titik pin berada di dalam area batas kuning untuk RT {formData.rt} / RW {formData.rw}.</p>
                   
-                  <div className="map-wrapper">
-                    <div className={`map-validation-badge ${selectedFeature ? 'active' : ''}`}>
-                      {selectedFeature ? `✓ Area RT ${formData.rt}/RW ${formData.rw}` : '! Batas area tidak ditemukan'}
-                    </div>
+                  <div className={`map-wrapper ${isFullscreen ? 'fullscreen' : ''}`}>
+                    
+                    {/* Badge Interaktif untuk Terbang ke Area RT */}
+                    <button 
+                      type="button" 
+                      onClick={flyToRegion}
+                      title="Klik untuk fokus ke area ini"
+                      className={`map-validation-badge ${selectedFeature ? 'active' : ''}`}
+                    >
+                      {selectedFeature ? `Area RT ${formData.rt}/RW ${formData.rw} (Klik)` : '! Batas area tidak ditemukan'}
+                    </button>
+                    
+                    {/* Tombol Fullscreen */}
+                    <button type="button" onClick={() => setIsFullscreen(!isFullscreen)} className="btn-fullscreen" title="Layar Penuh">
+                      {isFullscreen ? <ExitFullscreenIcon /> : <FullscreenIcon />}
+                    </button>
 
-                    <MapContainer center={mapPosition} zoom={16} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
-                      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                    {/* Tombol GPS Current Location */}
+                    <button type="button" onClick={flyToGPS} className="btn-gps" title="Gunakan Lokasi GPS Saat Ini">
+                      <GPSIcon />
+                    </button>
+
+                    <MapContainer 
+                      center={mapPosition} 
+                      zoom={16} 
+                      scrollWheelZoom={true} 
+                      style={{ height: '100%', width: '100%', zIndex: 0 }}
+                      ref={setMapRef}
+                    >
+                      <MapResizer isFullscreen={isFullscreen} />
                       
+                      {/* Pilihan Basemap */}
+                      <LayersControl position="topright">
+                        <LayersControl.BaseLayer checked name="Peta Standar">
+                          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                        </LayersControl.BaseLayer>
+                        <LayersControl.BaseLayer name="Satelit Google">
+                          <TileLayer url="http://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}" />
+                        </LayersControl.BaseLayer>
+                        <LayersControl.BaseLayer name="Peta Polos">
+                          <TileLayer url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png" />
+                        </LayersControl.BaseLayer>
+                        <LayersControl.BaseLayer name="Peta Gelap">
+                          <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
+                        </LayersControl.BaseLayer>
+                      </LayersControl>
+                      
+                      {/* Render polygon RT/RW untuk memandu pengguna */}
                       {selectedFeature && (
                         <GeoJSON 
                           key={`target-${formData.rt}-${formData.rw}`} 
@@ -691,7 +813,7 @@ const FormKuesioner = () => {
                 </button>
               ) : (
                 <button type="submit" disabled={isLoading} className="btn-primary" style={{ backgroundColor: isLoading ? '#e5e7eb' : '#ffe16f', color: isLoading ? '#9ca3af' : '#1a1a1b' }}>
-                  {isLoading ? 'Mensinkronisasi...' : 'Kirim Data'}
+                  Kirim Data
                 </button>
               )}
             </div>
