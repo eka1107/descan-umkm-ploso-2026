@@ -43,19 +43,41 @@ const DesaCantikLogo = () => (
 );
 
 // --- KOMPONEN CUSTOM MODAL POP-UP (Elegan & Selaras Tema) ---
-const CustomModal = ({ isOpen, title, message, type = 'info', onConfirm }) => {
+// --- KOMPONEN CUSTOM MODAL POP-UP (Elegan & Selaras Tema) ---
+const CustomModal = ({ isOpen, title, message, type = 'info', onConfirm, onCancel }) => {
   if (!isOpen) return null;
+
+  // Setelan warna dinamis (Success = Hijau Gelap)
+  let bgColor = '#ecfdf5';
+  let textColor = '#007D60'; // Hijau gelap
+  let icon = '✓';
+  let btnText = 'Selesai';
+  let btnBg = '#007D60'; // Hijau gelap
+
+  if (type === 'error') {
+    bgColor = '#fef2f2'; textColor = '#ef4444'; icon = '✕'; btnText = 'Perbaiki'; btnBg = '#ef4444';
+  } else if (type === 'confirm') {
+    bgColor = '#fffbeb'; textColor = '#d97706'; icon = '?'; btnText = 'Kirim Sekarang'; btnBg = '#1a1a1b';
+  }
+
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 999999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(26,26,27,0.6)', backdropFilter: 'blur(4px)' }}>
-      <div style={{ background: '#fff', width: '90%', maxWidth: '380px', borderRadius: '16px', padding: '32px', boxShadow: '0 24px 48px rgba(0,0,0,0.2)', animation: 'slideUp 0.3s ease', textAlign: 'center', borderTop: `6px solid ${type === 'error' ? '#ef4444' : '#10b981'}` }}>
-        <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: type === 'error' ? '#fef2f2' : '#ecfdf5', color: type === 'error' ? '#ef4444' : '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto', fontSize: '32px' }}>
-          {type === 'error' ? '✕' : '✓'}
+      <div style={{ background: '#fff', width: '90%', maxWidth: '380px', borderRadius: '16px', padding: '32px', boxShadow: '0 24px 48px rgba(0,0,0,0.2)', animation: 'slideUp 0.3s ease', textAlign: 'center', borderTop: `6px solid ${btnBg}` }}>
+        <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: bgColor, color: textColor, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto', fontSize: '32px', fontWeight: 'bold' }}>
+          {icon}
         </div>
         <h3 style={{ margin: '0 0 12px 0', fontSize: '22px', color: '#1a1a1b', fontWeight: 800 }}>{title}</h3>
         <p style={{ color: '#4E4E4E', fontSize: '15px', lineHeight: 1.5, margin: '0 0 28px 0' }}>{message}</p>
-        <button onClick={onConfirm} style={{ width: '100%', padding: '14px', background: type === 'error' ? '#ef4444' : '#1a1a1b', color: '#fff', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: 700, fontSize: '15px', transition: '0.2s' }}>
-          {type === 'error' ? 'Perbaiki' : 'Selesai'}
-        </button>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+          {onCancel && (
+            <button type="button" onClick={onCancel} style={{ flex: 1, padding: '14px', background: '#f3f4f6', color: '#1a1a1b', border: '1px solid #d1d5db', borderRadius: '12px', cursor: 'pointer', fontWeight: 700, fontSize: '15px' }}>
+              Batal
+            </button>
+          )}
+          <button type="button" onClick={onConfirm} style={{ flex: 1, padding: '14px', background: btnBg, color: '#fff', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: 700, fontSize: '15px', transition: '0.2s' }}>
+            {btnText}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -333,59 +355,65 @@ const FormKuesioner = () => {
       );
     }
   };
+  const closeOnlyModal = () => {
+    setModal(prev => ({ ...prev, isOpen: false }));
+  };
+  // 2. FUNGSI TUTUP SUKSES (BARU RELOAD/RESET KUESIONER)
+  const closeSuccessModal = () => {
+    window.location.reload(); 
+  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // VALIDASI TITIK MAP GEOGRAFIS TERHADAP WILAYAH RT/RW
-    if (selectedFeature) {
-      const isInside = isPointInMultiPolygon([mapPosition.lng, mapPosition.lat], selectedFeature.geometry);
-      if (!isInside) {
-        setModal({
-          isOpen: true, type: 'error', title: 'Lokasi Tidak Sesuai Wilayah',
-          message: `Titik pin peta saat ini berada di luar batas wilayah RT ${formData.rt} / RW ${formData.rw}. Harap geser pin ke dalam area yang ditandai kuning di peta.`
-        });
-        return; 
-      }
-    }
-
+  // 2. FUNGSI UNTUK MENGIRIM DATA (JALAN JIKA DIKLIK YAKIN PADA KONFIRMASI)
+  // 3. FUNGSI KIRIM DATA (Jalan jika klik "Kirim Sekarang")
+  const executeSubmit = async () => {
+    closeOnlyModal(); // Tutup pop-up konfirmasi dengan aman
     setIsLoading(true);
     const payload = { ...formData, waktuMulai, waktuSelesai: new Date().toISOString() };
     
     try {
-      const response = await axios.post(SCRIPT_URL, JSON.stringify(payload), {
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-      });
-      
+      const response = await axios.post(SCRIPT_URL, JSON.stringify(payload), { headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
       let resData = response.data;
-      if (typeof resData === 'string') {
-        try { resData = JSON.parse(resData); } catch(e) {}
-      }
+      if (typeof resData === 'string') { try { resData = JSON.parse(resData); } catch(e) {} }
       
       if (resData && resData.status === 'success') {
-        setModal({ 
-          isOpen: true, type: 'success', title: 'Berhasil Disimpan', 
-          message: 'Data UMKM telah berhasil direkam ke dalam database kelurahan.' 
-        });
+        // Jika sukses, panggil closeSuccessModal yang me-reload halaman
+        setModal({ isOpen: true, type: 'success', title: 'Berhasil Disimpan', message: 'Data usaha telah berhasil direkam ke dalam database kelurahan.', onConfirm: closeSuccessModal });
       } else {
-        setModal({ 
-          isOpen: true, type: 'error', title: 'Gagal di Server', 
-          message: resData.message || 'Terjadi kesalahan saat memproses data di Google Sheet.' 
-        });
+        setModal({ isOpen: true, type: 'error', title: 'Gagal di Server', message: resData.message || 'Terjadi kesalahan saat memproses data.', onConfirm: closeOnlyModal });
       }
     } catch (error) {
-      setModal({ 
-        isOpen: true, type: 'error', title: 'Koneksi Terputus', 
-        message: 'Gagal mengirim data. Pastikan koneksi internet stabil dan URL skrip valid.' 
-      });
+      setModal({ isOpen: true, type: 'error', title: 'Koneksi Terputus', message: 'Gagal mengirim data. Pastikan koneksi internet stabil.', onConfirm: closeOnlyModal });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const closeModal = () => {
-    if (modal.type === 'success') window.location.reload(); 
-    setModal({ ...modal, isOpen: false });
+  // 4. FUNGSI SUBMIT TAHAP 7 (Memunculkan Pop-Up Konfirmasi)
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    // Validasi Peta
+    if (selectedFeature) {
+      const isInside = isPointInMultiPolygon([mapPosition.lng, mapPosition.lat], selectedFeature.geometry);
+      if (!isInside) {
+        setModal({
+          isOpen: true, type: 'error', title: 'Lokasi Tidak Sesuai',
+          message: `Titik pin peta berada di luar batas wilayah RT ${formData.rt} / RW ${formData.rw}. Harap geser pin.`,
+          onConfirm: closeOnlyModal
+        });
+        return; 
+      }
+    }
+
+    // Panggil Pop-Up Konfirmasi
+    setModal({
+      isOpen: true,
+      type: 'confirm',
+      title: 'Kirim Kuesioner?',
+      message: 'Apakah Anda yakin semua isian data dan foto yang diunggah sudah benar?',
+      onConfirm: executeSubmit,
+      onCancel: closeOnlyModal // <--- JIKA BATAL, HANYA TUTUP POP-UP, TIDAK RESET
+    });
   };
 
   return (
@@ -481,24 +509,53 @@ const FormKuesioner = () => {
       {/* FULLSCREEN LOADER DESA CANTIK */}
       {isLoading && (
         <div className="loader-overlay">
-          <DesaCantikLogo />
-          <div className="loader-title">DESA CANTIK PLOSO</div>
-          <div className="loader-subtitle">Mensinkronisasi data ke server...</div>
+          <img src="/logo_ploso.png" alt="Logo Desa Cantik" style={{ height: '70px', objectFit: 'contain' }} />
+          <div className="loader-title">DESA CANTIK KELURAHAN PLOSO</div>
+          <div className="loader-subtitle">Menyimpan data usaha...</div>
         </div>
       )}
 
       <div className="app-container">
-        <CustomModal {...modal} onConfirm={closeModal} />
+        <CustomModal {...modal} onConfirm={modal.onConfirm || closeOnlyModal} onCancel={modal.onCancel} />
 
         <div className="form-card" style={{ transform: isFullscreen ? 'none' : '' }}>
           
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-            <img src="/logo.png" alt="Logo Desa Cantik" style={{ height: '42px', objectFit: 'contain' }} />
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '12px', 
+            marginBottom: '24px', 
+            padding: '8px 0',
+            borderBottom: '1px solid #f3f4f6' 
+          }}>
+          <img src="/logo_ploso.png" alt="Logo Desa Cantik" style={{ height: '48px', objectFit: 'contain' }} />
+          
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <h1 style={{ 
+              margin: 0, 
+              fontSize: '20px', 
+              fontWeight: '800', 
+              fontFamily: 'Outfit, sans-serif', 
+              color: '#1a1a1b',
+              letterSpacing: '-0.5px' 
+            }}>
+              PUSAKA
+            </h1>
+            <p style={{ 
+              margin: 0, 
+              fontSize: '12px', 
+              color: '#6b7280', 
+              fontWeight: '500' 
+            }}>
+              Pendataan Usaha Kelurahan Ploso
+            </p>
           </div>
-
-          <div className="step-badge" style={{ top: '32px' }}>Tahap {step}/{totalSteps}</div>
+        </div>
+          
+         
           
           <div className="progress-container">
+             <div className="step-badge" style={{ top: '32px' }}>Tahap {step}/{totalSteps}</div>
             <div className="progress-bar" style={{ width: `${(step / totalSteps) * 100}%` }}></div>
           </div>
 
@@ -522,7 +579,7 @@ const FormKuesioner = () => {
                         listPetugas.map((nama, idx) => <option key={idx} value={nama}>{nama}</option>)
                       ) : (<option value="" disabled>Memuat daftar petugas...</option>)}
                     </select>
-                    {listPetugas.length === 0 && <span className="note" style={{ color: '#ef4444' }}>*Memuat data dari server...</span>}
+                    {listPetugas.length === 0 && <span className="note" style={{ color: '#ef4444' }}>*Memuat data...</span>}
                   </div>
                 </div>
               )}
@@ -530,10 +587,10 @@ const FormKuesioner = () => {
               {step === 2 && (
                 <div style={{ animation: 'slideUp 0.3s ease' }}>
                   <h2 className="step-title">Identitas Usaha</h2>
-                  <p className="step-desc">Detail informasi lokasi dan kontak dasar UMKM.</p>
+                  <p className="step-desc">Detail informasi lokasi dan kontak dasar usaha</p>
                   <div className="input-group">
                     <label>Nama Usaha</label>
-                    <input type="text" name="namaUsaha" value={formData.namaUsaha} onChange={handleChange} required className="pintarly-input" placeholder="Contoh: Warung Berkah" autoFocus />
+                    <input type="text" name="namaUsaha" value={formData.namaUsaha} onChange={handleChange} required className="pintarly-input" placeholder="Contoh: Bengkel Motor Samudra Jaya, Warung Makan Berkah, Sate Pak Tono" autoFocus />
                   </div>
                   <div className="input-group">
                     <label>Alamat Usaha</label>
@@ -561,7 +618,7 @@ const FormKuesioner = () => {
                   </div>
 
                   <div className="input-group">
-                    <label>Nomor HP (Opsional)</label>
+                    <label>Nomor HP Pengelola Usaha (Opsional)</label>
                     <input type="tel" name="noHp" value={formData.noHp} onChange={handleChange} className="pintarly-input" placeholder="08xxxxxxxxxx" />
                   </div>
                 </div>
@@ -570,7 +627,7 @@ const FormKuesioner = () => {
               {step === 3 && (
                 <div style={{ animation: 'slideUp 0.3s ease' }}>
                   <h2 className="step-title">Foto Usaha</h2>
-                  <p className="step-desc">Ambil foto produk atau tampak depan bangunan UMKM.</p>
+                  <p className="step-desc">Ambil foto produk atau tampak depan bangunan usaha</p>
                   <div className="upload-options">
                     <label className="upload-btn">
                       <CameraIcon /> Kamera
@@ -605,7 +662,9 @@ const FormKuesioner = () => {
               {step === 5 && (
                 <div style={{ animation: 'slideUp 0.3s ease' }}>
                   <h2 className="step-title">Legalitas (NIB)</h2>
-                  <p className="step-desc">Pendataan status kepemilikan Nomor Induk Berusaha.</p>
+                  <p className="step-desc">Pendataan status kepemilikan <span style={{ backgroundColor: '#ffe16f', color: '#1a1a1b', padding: '2px 2px', borderRadius: '0px', fontWeight: '600' }}>
+                    Nomor Induk Berusaha
+                    </span></p>
                   <div className="input-group">
                     <label>Apakah memiliki NIB?</label>
                     <select name="punyaNib" value={formData.punyaNib} onChange={handleChange} required className="pintarly-input" style={{ backgroundColor: '#fff' }}>
@@ -682,7 +741,7 @@ const FormKuesioner = () => {
                   <h2 className="step-title">Metode QRIS</h2>
                   <p className="step-desc">Pemanfaatan alat pembayaran digital nontunai.</p>
                   <div className="input-group">
-                    <label>Menerima QRIS?</label>
+                    <label>Apakah memiliki metode pembayaran QRIS?</label>
                     <select name="punyaQris" value={formData.punyaQris} onChange={handleChange} required className="pintarly-input" style={{ backgroundColor: '#fff' }}>
                       <option value="" disabled hidden>Pilih Jawaban</option>
                       <option value="Ya">Ya, Menerima</option>
@@ -760,13 +819,13 @@ const FormKuesioner = () => {
                       
                       {/* Pilihan Basemap */}
                       <LayersControl position="topright">
-                        <LayersControl.BaseLayer checked name="Peta Standar">
+                        <LayersControl.BaseLayer  name="Peta Standar">
                           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                         </LayersControl.BaseLayer>
-                        <LayersControl.BaseLayer name="Satelit Google">
+                        <LayersControl.BaseLayer checked name="Satelit">
                           <TileLayer url="http://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}" />
                         </LayersControl.BaseLayer>
-                        <LayersControl.BaseLayer name="Peta Polos">
+                        <LayersControl.BaseLayer name="Peta Terang">
                           <TileLayer url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png" />
                         </LayersControl.BaseLayer>
                         <LayersControl.BaseLayer name="Peta Gelap">
@@ -817,9 +876,20 @@ const FormKuesioner = () => {
                 </button>
               )}
             </div>
-
+              <footer
+                  style={{
+                    marginTop: '24px',
+                    fontSize: '12px',
+                    color: '#6b7280',
+                    textAlign: 'center'
+                  }}
+                >
+              &copy; 2026 Tim Desa Cantik BPS Kabupaten Pacitan
+              <span style={{ color: '#facc15' }}> </span>
+            </footer>
           </form>
         </div>
+        
       </div>
     </>
   );

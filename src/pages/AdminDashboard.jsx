@@ -7,7 +7,7 @@ import L from 'leaflet';
 import plosoGeojson from '../3501040002_Ploso.json';
 import { kbliOptions } from '../dataKbliKategori'; // Pastikan file ini ada
 
-// --- KONFIGURASI ICON TITIK UMKM ---
+// --- KONFIGURASI ICON TITIK Usaha ---
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -20,7 +20,7 @@ const markerHtml = `
     <div style="background: #fff; width: 4px; height: 4px; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></div>
   </div>
 `;
-const umkmIcon = L.divIcon({ className: "custom-pin", html: markerHtml, iconSize: [20, 20], iconAnchor: [10, 10], popupAnchor: [0, -10] });
+const UsahaIcon = L.divIcon({ className: "custom-pin", html: markerHtml, iconSize: [20, 20], iconAnchor: [10, 10], popupAnchor: [0, -10] });
 
 // --- ALGORITMA VALIDASI POINT-IN-POLYGON ---
 const isPointInMultiPolygon = (point, geometry) => {
@@ -69,7 +69,7 @@ function EditLocationMarker({ position, setPosition, editFeature, openAlert, rtr
       if (editFeature) {
         const isInside = isPointInMultiPolygon([e.latlng.lng, e.latlng.lat], editFeature.geometry);
         if (!isInside) {
-          openAlert("Peringatan Wilayah", `Lokasi UMKM tidak berada di area RT ${rtrwData['RT']} RW ${rtrwData['RW']}.`, "danger");
+          openAlert("Peringatan Wilayah", `Lokasi Usaha tidak berada di area RT ${rtrwData['RT']} RW ${rtrwData['RW']}.`, "danger");
           return;
         }
       }
@@ -86,7 +86,7 @@ function EditLocationMarker({ position, setPosition, editFeature, openAlert, rtr
         if (editFeature) {
           const isInside = isPointInMultiPolygon([newPos.lng, newPos.lat], editFeature.geometry);
           if (!isInside) {
-            openAlert("Peringatan Wilayah", `Lokasi UMKM tidak berada di area RT ${rtrwData['RT']} RW ${rtrwData['RW']}.`, "danger");
+            openAlert("Peringatan Wilayah", `Lokasi Usaha tidak berada di area RT ${rtrwData['RT']} RW ${rtrwData['RW']}.`, "danger");
             return;
           }
         }
@@ -99,7 +99,7 @@ function EditLocationMarker({ position, setPosition, editFeature, openAlert, rtr
     ? { lat: parseFloat(position.split(',')[0]), lng: parseFloat(position.split(',')[1]) } 
     : null;
     
-  return posObj ? <Marker draggable={true} eventHandlers={eventHandlers} position={posObj} ref={markerRef} icon={umkmIcon} /> : null;
+  return posObj ? <Marker draggable={true} eventHandlers={eventHandlers} position={posObj} ref={markerRef} icon={UsahaIcon} /> : null;
 }
 
 // --- KOMPONEN CUSTOM MODAL POP-UP ---
@@ -169,14 +169,14 @@ const AdminDashboard = () => {
   const [pinInput, setPinInput] = useState('');
   
   const [activeTab, setActiveTab] = useState('beranda');
-  const [dataUmkm, setDataUmkm] = useState([]);
+  const [dataUsaha, setDataUsaha] = useState([]);
   const [listPetugas, setListPetugas] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLegendOpen, setIsLegendOpen] = useState(true);
   
   const [modal, setModal] = useState({ isOpen: false, title: '', message: '', type: 'info', onConfirm: null, onCancel: null });
-  const [editUmkmModal, setEditUmkmModal] = useState({ isOpen: false, data: null });
+  const [editUsahaModal, setEditUsahaModal] = useState({ isOpen: false, data: null });
   const [editMapRef, setEditMapRef] = useState(null);
   const [petugasModal, setPetugasModal] = useState({ isOpen: false, type: '', nama: '' });
 
@@ -193,7 +193,7 @@ const AdminDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   
-  const [targetUmkm, setTargetUmkm] = useState(500);
+  const [targetUsaha, setTargetUsaha] = useState(500);
   const centerPloso = [-8.2050, 111.1050];
   const [barChartMetric, setBarChartMetric] = useState('jumlah');
 
@@ -249,8 +249,8 @@ const AdminDashboard = () => {
     setIsLoading(true);
     try {
       const res = await axios.get(SCRIPT_URL);
-      if (Array.isArray(res.data)) setDataUmkm(res.data);
-    } catch (e) { openAlert("Error", "Gagal mengambil data UMKM.", "danger"); } 
+      if (Array.isArray(res.data)) setDataUsaha(res.data);
+    } catch (e) { openAlert("Error", "Gagal mengambil data Usaha.", "danger"); } 
     finally { setIsLoading(false); }
   };
 
@@ -265,7 +265,7 @@ const AdminDashboard = () => {
     setIsLoading(true);
     try {
       await axios.post(SCRIPT_URL, JSON.stringify({ action: 'deleteData', namaUsaha: nama }), { headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
-      setDataUmkm(prev => prev.filter(d => d['Nama Usaha'] !== nama));
+      setDataUsaha(prev => prev.filter(d => d['Nama Usaha'] !== nama));
       openAlert("Berhasil", "Data berhasil dihapus dari server.", "success");
     } catch(e) { openAlert("Error", "Gagal menghapus data di server.", "danger"); }
     finally { setIsLoading(false); }
@@ -273,13 +273,13 @@ const AdminDashboard = () => {
 
   const handleFocusWilayah = () => {
   // Pastikan editMapRef sudah terhubung ke MapContainer
-  if (!editMapRef || !editUmkmModal.data.RT || !editUmkmModal.data.RW) return;
+  if (!editMapRef || !editUsahaModal.data.RT || !editUsahaModal.data.RW) return;
 
   // Mencari feature RT/RW yang dipilih
   const feature = plosoGeojson.features.find(f => {
     const nmsls = f.properties.nmsls || '';
-    return nmsls.includes(`RT ${String(editUmkmModal.data.RT).padStart(2, '0')}`) && 
-           nmsls.includes(`RW ${String(editUmkmModal.data.RW).padStart(2, '0')}`);
+    return nmsls.includes(`RT ${String(editUsahaModal.data.RT).padStart(2, '0')}`) && 
+           nmsls.includes(`RW ${String(editUsahaModal.data.RW).padStart(2, '0')}`);
   });
 
   if (feature) {
@@ -296,7 +296,7 @@ const AdminDashboard = () => {
       const objectUrl = URL.createObjectURL(file); 
       const reader = new FileReader();
       reader.onloadend = () => {
-        setEditUmkmModal(prev => ({
+        setEditUsahaModal(prev => ({
           ...prev,
           [type === 'usaha' ? 'previewUsaha' : 'previewQris']: objectUrl, 
           data: {
@@ -314,8 +314,8 @@ const AdminDashboard = () => {
     e.preventDefault();
     
     // Validasi NIB
-    if (editUmkmModal.data['Punya NIB'] === 'Ya') {
-      const nibValue = editUmkmModal.data['Nomor NIB'] || '';
+    if (editUsahaModal.data['Punya NIB'] === 'Ya') {
+      const nibValue = editUsahaModal.data['Nomor NIB'] || '';
       if (nibValue.length !== 13 || !/^\d+$/.test(nibValue)) {
         openAlert("Validasi Gagal", "Nomor NIB harus diisi tepat 13 digit angka tanpa spasi atau huruf.", "danger");
         return;
@@ -331,17 +331,17 @@ const AdminDashboard = () => {
     };
 
     setIsLoading(true);
-    const updatedData = { ...editUmkmModal.data };
+    const updatedData = { ...editUsahaModal.data };
     const oldNama = updatedData.oldNamaUsaha;
     delete updatedData.oldNamaUsaha; 
 
     // Optimistic Update
-    setDataUmkm(prev => prev.map(item => item['Nama Usaha'] === oldNama ? updatedData : item));
+    setDataUsaha(prev => prev.map(item => item['Nama Usaha'] === oldNama ? updatedData : item));
 
     try {
-      await axios.post(SCRIPT_URL, JSON.stringify({ action: 'editData', ...editUmkmModal.data }), { headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
-      setEditUmkmModal({ isOpen: false, data: null });
-      openAlert("Berhasil", "Data UMKM berhasil diperbarui.", "success");
+      await axios.post(SCRIPT_URL, JSON.stringify({ action: 'editData', ...editUsahaModal.data }), { headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
+      setEditUsahaModal({ isOpen: false, data: null });
+      openAlert("Berhasil", "Data Usaha berhasil diperbarui.", "success");
     } catch(e) { 
       openAlert("Error", "Gagal menyimpan perubahan ke server.", "danger"); 
       fetchData(); 
@@ -370,7 +370,7 @@ const AdminDashboard = () => {
     finally { setIsLoading(false); }
   };
 
-  const filteredData = dataUmkm.filter(item => {
+  const filteredData = dataUsaha.filter(item => {
     const dRt = String(item['RT']).padStart(2, '0');
     const dRw = String(item['RW']).padStart(2, '0');
     const matchRT = filterRT === '' || dRt === filterRT;
@@ -431,7 +431,7 @@ const AdminDashboard = () => {
     layer.bindTooltip(`
       <div style="font-family: 'Inter', sans-serif; color: #1a1a1b;">
         <div style="font-weight: 800; font-size: 15px; margin-bottom: 4px;">${name}</div>
-        <div style="font-size: 14px; color: #4E4E4E;">Total Pendataan: <strong>${count} UMKM</strong></div>
+        <div style="font-size: 14px; color: #4E4E4E;">Total Pendataan: <strong>${count} Usaha</strong></div>
       </div>
     `, { sticky: true, direction: "top", offset: [0, -10] });
 
@@ -440,7 +440,7 @@ const AdminDashboard = () => {
 
   const getRwChartData = () => {
     const stats = {};
-    dataUmkm.forEach(d => {
+    dataUsaha.forEach(d => {
       const rw = d['RW'] ? String(d['RW']).padStart(2, '0') : 'Lainnya';
       if(!stats[rw]) stats[rw] = { total: 0, nib: 0, qris: 0 };
       stats[rw].total += 1;
@@ -467,7 +467,7 @@ const AdminDashboard = () => {
 
   const getAlasanNibData = () => {
     const counts = {};
-    dataUmkm.filter(d => d['Punya NIB'] === 'Tidak').forEach(d => {
+    dataUsaha.filter(d => d['Punya NIB'] === 'Tidak').forEach(d => {
       const alasan = d['Alasan Tidak NIB'] && d['Alasan Tidak NIB'] !== '-' ? d['Alasan Tidak NIB'] : 'Tidak Diketahui';
       counts[alasan] = (counts[alasan] || 0) + 1;
     });
@@ -477,19 +477,19 @@ const AdminDashboard = () => {
   };
   const { sorted: alasanNibData, maxVal: alasanNibMax } = getAlasanNibData();
 
-  const totalBelumNib = dataUmkm.filter(d => d['Punya NIB'] === 'Tidak').length;
-  const mauNib = dataUmkm.filter(d => d['Punya NIB'] === 'Tidak' && d['Urus NIB'] === 'Ya').length;
+  const totalBelumNib = dataUsaha.filter(d => d['Punya NIB'] === 'Tidak').length;
+  const mauNib = dataUsaha.filter(d => d['Punya NIB'] === 'Tidak' && d['Urus NIB'] === 'Ya').length;
   const pctMauNib = totalBelumNib > 0 ? ((mauNib / totalBelumNib) * 100).toFixed(1) : 0;
 
-  const totalBelumQris = dataUmkm.filter(d => d['Punya QRIS'] === 'Tidak').length;
-  const mauQris = dataUmkm.filter(d => d['Punya QRIS'] === 'Tidak' && d['Urus QRIS'] === 'Ya').length;
+  const totalBelumQris = dataUsaha.filter(d => d['Punya QRIS'] === 'Tidak').length;
+  const mauQris = dataUsaha.filter(d => d['Punya QRIS'] === 'Tidak' && d['Urus QRIS'] === 'Ya').length;
   const pctMauQris = totalBelumQris > 0 ? ((mauQris / totalBelumQris) * 100).toFixed(1) : 0;
 
   const FilterControls = () => (
     <div className="filter-bar">
       <div className="search-wrapper">
         <Icons.Search />
-        <input type="text" className="clean-input" placeholder="Cari UMKM atau Petugas..." value={searchTableQuery} onChange={(e) => setSearchTableQuery(e.target.value)} />
+        <input type="text" className="clean-input" placeholder="Cari Usaha atau Petugas..." value={searchTableQuery} onChange={(e) => setSearchTableQuery(e.target.value)} />
       </div>
       <select className="clean-input" value={filterRW} onChange={e => { setFilterRW(e.target.value); setFilterRT(''); }}>
         <option value="">Semua RW</option>
@@ -534,7 +534,7 @@ const AdminDashboard = () => {
     useEffect(() => { setTimeout(() => setIsMounted(true), 100); }, []);
 
     const total = dataTarget.length;
-    const safeTarget = Number(targetUmkm) > 0 ? Number(targetUmkm) : 1;
+    const safeTarget = Number(targetUsaha) > 0 ? Number(targetUsaha) : 1;
     const pctTotal = Math.min((total / safeTarget) * 100, 100).toFixed(1);
     
     const countNib = dataTarget.filter(d => d['Punya NIB'] === 'Ya').length;
@@ -545,9 +545,9 @@ const AdminDashboard = () => {
     return (
       <section className="kpi-grid" style={{ marginBottom: '32px' }}>
         <div className="content-card">
-          <div className="kpi-title">TOTAL UMKM DIDATA</div>
+          <div className="kpi-title">TOTAL Usaha DIDATA</div>
           <div className="kpi-value" style={{ color: '#007D60' }}><AnimatedNumber value={total} /></div>
-          <div className="kpi-label">Dari target estimasi {targetUmkm} usaha.</div>
+          <div className="kpi-label">Dari target estimasi {targetUsaha} usaha.</div>
           <div className="progress-wrapper">
             <div className="progress-track"><div className="progress-fill" style={{ width: isMounted ? `${pctTotal}%` : '0%', transition: 'width 1.5s cubic-bezier(0.22, 1, 0.36, 1)' }}></div></div>
             <div className="progress-text">{pctTotal}%</div>
@@ -596,7 +596,7 @@ const AdminDashboard = () => {
 
         {plosoGeojson && (
           <GeoJSON 
-            key={`geojson-${filterRT}-${filterRW}-${filterNIB}-${filterQRIS}-${filterKBLI}-${searchTableQuery}-${dataUmkm.length}`}
+            key={`geojson-${filterRT}-${filterRW}-${filterNIB}-${filterQRIS}-${filterKBLI}-${searchTableQuery}-${dataUsaha.length}`}
             data={plosoGeojson} 
             style={getGeoJsonStyle}
             onEachFeature={onEachGeoJsonFeature}
@@ -608,7 +608,7 @@ const AdminDashboard = () => {
           if (loc && loc !== '-' && loc.includes(',')) {
             const [lat, lng] = loc.split(',');
             return (
-              <Marker key={index} position={[parseFloat(lat), parseFloat(lng)]} icon={umkmIcon}>
+              <Marker key={index} position={[parseFloat(lat), parseFloat(lng)]} icon={UsahaIcon}>
                 <Tooltip direction="top" offset={[0, -20]} opacity={1} className="clean-tooltip" interactive={true}>
                   <div style={{ fontWeight: 800, fontSize: '16px', marginBottom: '8px' }}>{item['Nama Usaha']}</div>
                   <div style={{ fontSize: '13px', color: '#4E4E4E', marginBottom: '4px' }}><strong>KBLI:</strong> {item['KBLI']}</div>
@@ -635,10 +635,10 @@ const AdminDashboard = () => {
         {isLegendOpen && (
           <>
             <div className="legend-item"><div className="legend-color" style={{background: '#f3f4f6'}}></div> 0 Data</div>
-            <div className="legend-item"><div className="legend-color" style={{background: '#a7f3d0'}}></div> 1 - 5 UMKM</div>
-            <div className="legend-item"><div className="legend-color" style={{background: '#34d399'}}></div> 6 - 15 UMKM</div>
-            <div className="legend-item"><div className="legend-color" style={{background: '#10b981'}}></div> 16 - 30 UMKM</div>
-            <div className="legend-item"><div className="legend-color" style={{background: '#007D60'}}></div> &gt; 30 UMKM</div>
+            <div className="legend-item"><div className="legend-color" style={{background: '#a7f3d0'}}></div> 1 - 5 Usaha</div>
+            <div className="legend-item"><div className="legend-color" style={{background: '#34d399'}}></div> 6 - 15 Usaha</div>
+            <div className="legend-item"><div className="legend-color" style={{background: '#10b981'}}></div> 16 - 30 Usaha</div>
+            <div className="legend-item"><div className="legend-color" style={{background: '#007D60'}}></div> &gt; 30 Usaha</div>
           </>
         )}
       </div>
@@ -651,7 +651,7 @@ const AdminDashboard = () => {
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f9fafb', fontFamily: 'Inter, sans-serif' }}>
         <CustomModal {...modal} onConfirm={modal.onConfirm || closeModal} />
         <div style={{ background: '#fff', padding: '48px', borderRadius: '6px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', textAlign: 'center', width: '100%', maxWidth: '380px', border: '1px solid #e5e7eb' }}>
-          <h2 style={{ fontSize: '28px', margin: '0 0 8px 0', color: '#1a1a1b', fontWeight: 800, letterSpacing: '-0.5px' }}>DASHBOARD UMKM</h2>
+          <h2 style={{ fontSize: '28px', margin: '0 0 8px 0', color: '#1a1a1b', fontWeight: 800, letterSpacing: '-0.5px' }}>DASHBOARD USAHA</h2>
           <p style={{ color: '#6b7280', fontSize: '15px', margin: '0 0 32px 0' }}>Kelurahan Ploso 2026</p>
           <form onSubmit={handleLogin}>
             <input type="password" value={pinInput} onChange={(e) => setPinInput(e.target.value)} placeholder="PIN Akses" style={{ width: '100%', padding: '16px', borderRadius: '6px', border: '1px solid #d1d5db', marginBottom: '24px', fontSize: '16px', textAlign: 'center', letterSpacing: '4px', outline: 'none', boxSizing: 'border-box', fontFamily: 'Inter', background: '#f9fafb' }} />
@@ -665,17 +665,17 @@ const AdminDashboard = () => {
   // Menyiapkan Variabel untuk Modal Edit agar rapi
   let editActiveFeature = null;
   let editMapCenter = centerPloso;
-  if (editUmkmModal.data) {
+  if (editUsahaModal.data) {
     editActiveFeature = plosoGeojson.features.find(f => {
       const rtMatch = (f.properties.nmsls || '').match(/RT\s+0*(\d+)/i);
       const rwMatch = (f.properties.nmsls || '').match(/RW\s+0*(\d+)/i);
       const rt = rtMatch ? String(parseInt(rtMatch[1])).padStart(2, '0') : '';
       const rw = rwMatch ? String(parseInt(rwMatch[1])).padStart(2, '0') : '';
-      return rt === String(editUmkmModal.data['RT']).padStart(2, '0') && 
-             rw === String(editUmkmModal.data['RW']).padStart(2, '0');
+      return rt === String(editUsahaModal.data['RT']).padStart(2, '0') && 
+             rw === String(editUsahaModal.data['RW']).padStart(2, '0');
     });
 
-    const currentLoc = editUmkmModal.data['Lokasi (Lat, Lng)'];
+    const currentLoc = editUsahaModal.data['Lokasi (Lat, Lng)'];
     if (currentLoc && currentLoc.includes(',')) {
       editMapCenter = { lat: parseFloat(currentLoc.split(',')[0]), lng: parseFloat(currentLoc.split(',')[1]) };
     }
@@ -791,19 +791,19 @@ const AdminDashboard = () => {
 
       <CustomModal {...modal} onConfirm={modal.onConfirm || closeModal} />
 
-      {/* MODAL EDIT UMKM KHUSUS */}
-      {editUmkmModal.isOpen && editUmkmModal.data && (() => {
+      {/* MODAL EDIT Usaha KHUSUS */}
+      {editUsahaModal.isOpen && editUsahaModal.data && (() => {
         // Mendapatkan batas polygon wilayah RT/RW data terpilih
         const editFeature = plosoGeojson.features.find(f => {
           const rtMatch = (f.properties.nmsls || '').match(/RT\s+0*(\d+)/i);
           const rwMatch = (f.properties.nmsls || '').match(/RW\s+0*(\d+)/i);
           const rt = rtMatch ? String(parseInt(rtMatch[1])).padStart(2, '0') : '';
           const rw = rwMatch ? String(parseInt(rwMatch[1])).padStart(2, '0') : '';
-          return rt === String(editUmkmModal.data['RT']).padStart(2, '0') && 
-                 rw === String(editUmkmModal.data['RW']).padStart(2, '0');
+          return rt === String(editUsahaModal.data['RT']).padStart(2, '0') && 
+                 rw === String(editUsahaModal.data['RW']).padStart(2, '0');
         });
 
-        const currentLoc = editUmkmModal.data['Lokasi (Lat, Lng)'];
+        const currentLoc = editUsahaModal.data['Lokasi (Lat, Lng)'];
         const mapCenter = currentLoc && currentLoc.includes(',') 
           ? { lat: parseFloat(currentLoc.split(',')[0]), lng: parseFloat(currentLoc.split(',')[1]) }
           : centerPloso;
@@ -813,7 +813,7 @@ const AdminDashboard = () => {
           <div style={{ background: '#fff', width: '100%', maxWidth: '640px', maxHeight: '95vh', display: 'flex', flexDirection: 'column', borderRadius: '8px', boxShadow: '0 24px 48px rgba(0,0,0,0.15)', overflowX: 'hidden', boxSizing: 'border-box' }}>
             
             <div style={{ padding: '20px 24px 14px 24px', borderBottom: '1px solid #e5e7eb', flexShrink: 0 }}>
-              <h3 style={{ margin: '0 0 4px 0', fontSize: '18px', color: '#1a1a1b', fontWeight: 800 }}>Edit Data UMKM</h3>
+              <h3 style={{ margin: '0 0 4px 0', fontSize: '18px', color: '#1a1a1b', fontWeight: 800 }}>Edit Data Usaha</h3>
               <p style={{ color: '#6b7280', fontSize: '13px', margin: 0 }}>Perbarui berkas administratif usaha lapangan.</p>
             </div>
             
@@ -824,11 +824,11 @@ const AdminDashboard = () => {
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
                   <div style={{ flex: '1 1 200px' }}>
                     <label style={{ fontSize: '12px', fontWeight: 700, marginBottom: '4px', display: 'block' }}>Nama Usaha</label>
-                    <input required type="text" className="clean-input" style={{ width: '100%', boxSizing: 'border-box' }} value={editUmkmModal.data['Nama Usaha'] || ''} onChange={e => setEditUmkmModal({ ...editUmkmModal, data: { ...editUmkmModal.data, 'Nama Usaha': e.target.value } })} />
+                    <input required type="text" className="clean-input" style={{ width: '100%', boxSizing: 'border-box' }} value={editUsahaModal.data['Nama Usaha'] || ''} onChange={e => setEditUsahaModal({ ...editUsahaModal, data: { ...editUsahaModal.data, 'Nama Usaha': e.target.value } })} />
                   </div>
                   <div style={{ flex: '1 1 200px' }}>
                     <label style={{ fontSize: '12px', fontWeight: 700, marginBottom: '4px', display: 'block' }}>Alamat Usaha</label>
-                    <input required type="text" className="clean-input" style={{ width: '100%', boxSizing: 'border-box' }} value={editUmkmModal.data['Alamat'] || ''} onChange={e => setEditUmkmModal({ ...editUmkmModal, data: { ...editUmkmModal.data, 'Alamat': e.target.value } })} />
+                    <input required type="text" className="clean-input" style={{ width: '100%', boxSizing: 'border-box' }} value={editUsahaModal.data['Alamat'] || ''} onChange={e => setEditUsahaModal({ ...editUsahaModal, data: { ...editUsahaModal.data, 'Alamat': e.target.value } })} />
                   </div>
                 </div>
 
@@ -836,25 +836,25 @@ const AdminDashboard = () => {
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
                   <div style={{ flex: '1 1 100px' }}>
                     <label style={{ fontSize: '12px', fontWeight: 700, marginBottom: '4px', display: 'block' }}>RW</label>
-                    <select required className="clean-input" style={{ width: '100%', boxSizing: 'border-box' }} value={String(editUmkmModal.data['RW'] || '').padStart(2, '0')} onChange={e => setEditUmkmModal({ ...editUmkmModal, data: { ...editUmkmModal.data, 'RW': e.target.value, 'RT': '' } })}>
+                    <select required className="clean-input" style={{ width: '100%', boxSizing: 'border-box' }} value={String(editUsahaModal.data['RW'] || '').padStart(2, '0')} onChange={e => setEditUsahaModal({ ...editUsahaModal, data: { ...editUsahaModal.data, 'RW': e.target.value, 'RT': '' } })}>
                       <option value="" disabled hidden>Pilih RW</option>
                       {rwList.map((rwStr, i) => <option key={i} value={rwStr}>{rwStr}</option>)}
                     </select>
                   </div>
                   <div style={{ flex: '1 1 100px' }}>
                     <label style={{ fontSize: '12px', fontWeight: 700, marginBottom: '4px', display: 'block' }}>RT</label>
-                    <select required className="clean-input" style={{ width: '100%', boxSizing: 'border-box' }} value={String(editUmkmModal.data['RT'] || '').padStart(2, '0')} onChange={e => setEditUmkmModal({ ...editUmkmModal, data: { ...editUmkmModal.data, 'RT': e.target.value } })} disabled={!editUmkmModal.data['RW']}>
+                    <select required className="clean-input" style={{ width: '100%', boxSizing: 'border-box' }} value={String(editUsahaModal.data['RT'] || '').padStart(2, '0')} onChange={e => setEditUsahaModal({ ...editUsahaModal, data: { ...editUsahaModal.data, 'RT': e.target.value } })} disabled={!editUsahaModal.data['RW']}>
                       <option value="" disabled hidden>Pilih RT</option>
-                      {editUmkmModal.data['RW'] && rwToRtMap[String(editUmkmModal.data['RW']).padStart(2, '0')] ? rwToRtMap[String(editUmkmModal.data['RW']).padStart(2, '0')].map((rtStr, i) => <option key={i} value={rtStr}>{rtStr}</option>) : null}
+                      {editUsahaModal.data['RW'] && rwToRtMap[String(editUsahaModal.data['RW']).padStart(2, '0')] ? rwToRtMap[String(editUsahaModal.data['RW']).padStart(2, '0')].map((rtStr, i) => <option key={i} value={rtStr}>{rtStr}</option>) : null}
                     </select>
                   </div>
                   <div style={{ flex: '1 1 200px' }}>
                     <label style={{ fontSize: '12px', fontWeight: 700, marginBottom: '4px', display: 'block' }}>Nomor HP</label>
-                    <input type="text" className="clean-input" style={{ width: '100%', boxSizing: 'border-box' }} value={editUmkmModal.data['No HP'] || ''} 
+                    <input type="text" className="clean-input" style={{ width: '100%', boxSizing: 'border-box' }} value={editUsahaModal.data['No HP'] || ''} 
                       onChange={e => {
                         let val = e.target.value.replace(/[^0-9]/g, '');
                         if (val.length > 0 && val[0] !== '0') val = '0' + val;
-                        setEditUmkmModal({ ...editUmkmModal, data: { ...editUmkmModal.data, 'No HP': val } })
+                        setEditUsahaModal({ ...editUsahaModal, data: { ...editUsahaModal.data, 'No HP': val } })
                       }} 
                     />
                   </div>
@@ -864,7 +864,7 @@ const AdminDashboard = () => {
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
                   <div style={{ flex: '1 1 200px' }}>
                     <label style={{ fontSize: '12px', fontWeight: 700, marginBottom: '4px', display: 'block' }}>KBLI 2025</label>
-                    <input required list="datalistKbliEdit" className="clean-input" style={{ width: '100%', boxSizing: 'border-box' }} placeholder="Pilih KBLI..." value={editUmkmModal.data['KBLI'] || ''} onChange={e => setEditUmkmModal({ ...editUmkmModal, data: { ...editUmkmModal.data, 'KBLI': e.target.value } })} />
+                    <input required list="datalistKbliEdit" className="clean-input" style={{ width: '100%', boxSizing: 'border-box' }} placeholder="Pilih KBLI..." value={editUsahaModal.data['KBLI'] || ''} onChange={e => setEditUsahaModal({ ...editUsahaModal, data: { ...editUsahaModal.data, 'KBLI': e.target.value } })} />
                     <datalist id="datalistKbliEdit">
                       {kbliOptions.map((opt, i) => (
                         <option key={i} value={opt.label || opt.value || opt} />
@@ -873,7 +873,7 @@ const AdminDashboard = () => {
                   </div>
                   <div style={{ flex: '1 1 250px' }}>
                     <label style={{ fontSize: '12px', fontWeight: 700, marginBottom: '4px', display: 'block' }}>Deskripsi Usaha</label>
-                    <textarea required className="clean-input" style={{ width: '100%', minHeight: '40px', resize: 'vertical', boxSizing: 'border-box' }} value={editUmkmModal.data['Deskripsi Usaha'] || ''} onChange={e => setEditUmkmModal({ ...editUmkmModal, data: { ...editUmkmModal.data, 'Deskripsi Usaha': e.target.value } })} />
+                    <textarea required className="clean-input" style={{ width: '100%', minHeight: '40px', resize: 'vertical', boxSizing: 'border-box' }} value={editUsahaModal.data['Deskripsi Usaha'] || ''} onChange={e => setEditUsahaModal({ ...editUsahaModal, data: { ...editUsahaModal.data, 'Deskripsi Usaha': e.target.value } })} />
                   </div>
                 </div>
 
@@ -881,17 +881,17 @@ const AdminDashboard = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', background: '#f9fafb', padding: '12px', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     <label style={{ fontSize: '12px', fontWeight: 700 }}>Status NIB</label>
-                    <select className="clean-input" style={{ width: '100%' }} value={editUmkmModal.data['Punya NIB'] || ''} onChange={e => setEditUmkmModal({ ...editUmkmModal, data: { ...editUmkmModal.data, 'Punya NIB': e.target.value } })}>
+                    <select className="clean-input" style={{ width: '100%' }} value={editUsahaModal.data['Punya NIB'] || ''} onChange={e => setEditUsahaModal({ ...editUsahaModal, data: { ...editUsahaModal.data, 'Punya NIB': e.target.value } })}>
                       <option value="Ya">Punya NIB</option><option value="Tidak">Belum Punya</option>
                     </select>
-                    {editUmkmModal.data['Punya NIB'] === 'Ya' && (
-                      <input type="text" className="clean-input" style={{ width: '100%', boxSizing: 'border-box' }} maxLength="13" value={editUmkmModal.data['Nomor NIB'] || ''} onChange={e => setEditUmkmModal({ ...editUmkmModal, data: { ...editUmkmModal.data, 'Nomor NIB': e.target.value.replace(/[^0-9]/g, '') } })} placeholder="13 Digit NIB" />
+                    {editUsahaModal.data['Punya NIB'] === 'Ya' && (
+                      <input type="text" className="clean-input" style={{ width: '100%', boxSizing: 'border-box' }} maxLength="13" value={editUsahaModal.data['Nomor NIB'] || ''} onChange={e => setEditUsahaModal({ ...editUsahaModal, data: { ...editUsahaModal.data, 'Nomor NIB': e.target.value.replace(/[^0-9]/g, '') } })} placeholder="13 Digit NIB" />
                     )}
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     <label style={{ fontSize: '12px', fontWeight: 700 }}>Status QRIS</label>
-                    <select className="clean-input" style={{ width: '100%' }} value={editUmkmModal.data['Punya QRIS'] || ''} onChange={e => setEditUmkmModal({ ...editUmkmModal, data: { ...editUmkmModal.data, 'Punya QRIS': e.target.value } })}>
+                    <select className="clean-input" style={{ width: '100%' }} value={editUsahaModal.data['Punya QRIS'] || ''} onChange={e => setEditUsahaModal({ ...editUsahaModal, data: { ...editUsahaModal.data, 'Punya QRIS': e.target.value } })}>
                       <option value="Ya">Punya QRIS</option><option value="Tidak">Belum Punya</option>
                     </select>
                   </div>
@@ -902,31 +902,31 @@ const AdminDashboard = () => {
                   <div style={{ border: '1px solid #d1d5db', borderRadius: '6px', padding: '10px' }}>
                     <label style={{ fontSize: '11px', fontWeight: 700, marginBottom: '6px', display: 'flex', justifyContent: 'space-between' }}>
                       Foto Tempat Usaha
-                      {editUmkmModal.data['URL Foto Usaha'] && editUmkmModal.data['URL Foto Usaha'] !== '-' && !editUmkmModal.previewUsaha && (
-                        <a href={editUmkmModal.data['URL Foto Usaha']} target="_blank" rel="noreferrer" style={{color: '#007D60', textDecoration: 'none'}}>Asli &nearr;</a>
+                      {editUsahaModal.data['URL Foto Usaha'] && editUsahaModal.data['URL Foto Usaha'] !== '-' && !editUsahaModal.previewUsaha && (
+                        <a href={editUsahaModal.data['URL Foto Usaha']} target="_blank" rel="noreferrer" style={{color: '#007D60', textDecoration: 'none'}}>Asli &nearr;</a>
                       )}
                     </label>
-                    {editUmkmModal.previewUsaha ? (
-                      <img src={editUmkmModal.previewUsaha} alt="Preview" style={{ width: '100%', height: '90px', objectFit: 'cover', borderRadius: '4px', marginBottom: '6px' }} />
-                    ) : editUmkmModal.data['URL Foto Usaha'] && editUmkmModal.data['URL Foto Usaha'] !== '-' ? (
-                      <img src={getDriveImageUrl(editUmkmModal.data['URL Foto Usaha'])} onError={(e)=>{e.target.style.display='none'}} alt="Usaha" style={{ width: '100%', height: '90px', objectFit: 'cover', borderRadius: '4px', marginBottom: '6px' }} />
+                    {editUsahaModal.previewUsaha ? (
+                      <img src={editUsahaModal.previewUsaha} alt="Preview" style={{ width: '100%', height: '90px', objectFit: 'cover', borderRadius: '4px', marginBottom: '6px' }} />
+                    ) : editUsahaModal.data['URL Foto Usaha'] && editUsahaModal.data['URL Foto Usaha'] !== '-' ? (
+                      <img src={getDriveImageUrl(editUsahaModal.data['URL Foto Usaha'])} onError={(e)=>{e.target.style.display='none'}} alt="Usaha" style={{ width: '100%', height: '90px', objectFit: 'cover', borderRadius: '4px', marginBottom: '6px' }} />
                     ) : <div style={{ height: '90px', background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', marginBottom: '6px', color: '#9ca3af', fontSize: '11px' }}>Tidak ada foto</div>}
                     <input type="file" accept="image/*" style={{ width: '100%', fontSize: '11px' }} onChange={(e) => handleEditFileUpload(e, 'usaha')} />
                   </div>
 
                   {/* INSTANT APPEAR: Langsung muncul jika value 'Ya' di-klik tanpa nunggu refresh */}
-                  {editUmkmModal.data['Punya QRIS'] === 'Ya' ? (
+                  {editUsahaModal.data['Punya QRIS'] === 'Ya' ? (
                     <div style={{ border: '1px solid #d1d5db', borderRadius: '6px', padding: '10px', animation: 'fadeIn 0.2s ease' }}>
                       <label style={{ fontSize: '11px', fontWeight: 700, marginBottom: '6px', display: 'flex', justifyContent: 'space-between' }}>
                         Foto Bukti QRIS
-                        {editUmkmModal.data['URL Foto QRIS'] && editUmkmModal.data['URL Foto QRIS'] !== '-' && !editUmkmModal.previewQris && (
-                          <a href={editUmkmModal.data['URL Foto QRIS']} target="_blank" rel="noreferrer" style={{color: '#007D60', textDecoration: 'none'}}>Asli &nearr;</a>
+                        {editUsahaModal.data['URL Foto QRIS'] && editUsahaModal.data['URL Foto QRIS'] !== '-' && !editUsahaModal.previewQris && (
+                          <a href={editUsahaModal.data['URL Foto QRIS']} target="_blank" rel="noreferrer" style={{color: '#007D60', textDecoration: 'none'}}>Asli &nearr;</a>
                         )}
                       </label>
-                      {editUmkmModal.previewQris ? (
-                        <img src={editUmkmModal.previewQris} alt="Preview" style={{ width: '100%', height: '90px', objectFit: 'cover', borderRadius: '4px', marginBottom: '6px' }} />
-                      ) : editUmkmModal.data['URL Foto QRIS'] && editUmkmModal.data['URL Foto QRIS'] !== '-' ? (
-                        <img src={getDriveImageUrl(editUmkmModal.data['URL Foto QRIS'])} onError={(e)=>{e.target.style.display='none'}} alt="QRIS" style={{ width: '100%', height: '90px', objectFit: 'cover', borderRadius: '4px', marginBottom: '6px' }} />
+                      {editUsahaModal.previewQris ? (
+                        <img src={editUsahaModal.previewQris} alt="Preview" style={{ width: '100%', height: '90px', objectFit: 'cover', borderRadius: '4px', marginBottom: '6px' }} />
+                      ) : editUsahaModal.data['URL Foto QRIS'] && editUsahaModal.data['URL Foto QRIS'] !== '-' ? (
+                        <img src={getDriveImageUrl(editUsahaModal.data['URL Foto QRIS'])} onError={(e)=>{e.target.style.display='none'}} alt="QRIS" style={{ width: '100%', height: '90px', objectFit: 'cover', borderRadius: '4px', marginBottom: '6px' }} />
                       ) : <div style={{ height: '90px', background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', marginBottom: '6px', color: '#9ca3af', fontSize: '11px' }}>Tidak ada foto</div>}
                       <input type="file" accept="image/*" style={{ width: '100%', fontSize: '11px' }} onChange={(e) => handleEditFileUpload(e, 'qris')} />
                     </div>
@@ -939,7 +939,7 @@ const AdminDashboard = () => {
                     <label style={{ fontSize: '12px', fontWeight: 700, margin: 0 }}>Titik Koordinat (Klik peta untuk ubah)</label>
                     {editFeature && (
                       <button type="button" onClick={() => flyToEditRegion(editFeature)} style={{ background: '#007D60', color: '#fff', border: 'none', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '700', cursor: 'pointer', transition: '0.2s' }}>
-                        🎯 Fokus Wilayah RT {editUmkmModal.data['RT']}
+                        🎯 Fokus Wilayah RT {editUsahaModal.data['RT']}
                       </button>
                     )}
                   </div>
@@ -956,23 +956,23 @@ const AdminDashboard = () => {
                         </LayersControl.BaseLayer>
                       </LayersControl>
                       
-                      {editFeature && <GeoJSON key={`edit-geojson-${editUmkmModal.data['RT']}-${editUmkmModal.data['RW']}`} data={editFeature} style={{ color: '#ef4444', weight: 3, fillColor: '#ef4444', fillOpacity: 0.15 }} />}
+                      {editFeature && <GeoJSON key={`edit-geojson-${editUsahaModal.data['RT']}-${editUsahaModal.data['RW']}`} data={editFeature} style={{ color: '#ef4444', weight: 3, fillColor: '#ef4444', fillOpacity: 0.15 }} />}
                       
-                      <EditLocationMarker position={editUmkmModal.data['Lokasi (Lat, Lng)']} editFeature={editFeature} openAlert={openAlert} rtrwData={editUmkmModal.data} setPosition={(pos) => setEditUmkmModal({ ...editUmkmModal, data: { ...editUmkmModal.data, 'Lokasi (Lat, Lng)': pos } })} />
+                      <EditLocationMarker position={editUsahaModal.data['Lokasi (Lat, Lng)']} editFeature={editFeature} openAlert={openAlert} rtrwData={editUsahaModal.data} setPosition={(pos) => setEditUsahaModal({ ...editUsahaModal, data: { ...editUsahaModal.data, 'Lokasi (Lat, Lng)': pos } })} />
                     </MapContainer>
                   </div>
-                  <input type="text" className="clean-input" style={{ width: '100%', background: '#fff', fontSize: '13px', boxSizing: 'border-box' }} readOnly value={editUmkmModal.data['Lokasi (Lat, Lng)'] || ''} />
+                  <input type="text" className="clean-input" style={{ width: '100%', background: '#fff', fontSize: '13px', boxSizing: 'border-box' }} readOnly value={editUsahaModal.data['Lokasi (Lat, Lng)'] || ''} />
                 </div>
 
                 <div>
                   <label style={{ fontSize: '12px', fontWeight: 700, marginBottom: '4px' }}>Catatan</label>
-                  <textarea className="clean-input" style={{ width: '100%', minHeight: '40px', resize: 'vertical', boxSizing: 'border-box' }} value={editUmkmModal.data['Catatan'] || ''} onChange={e => setEditUmkmModal({ ...editUmkmModal, data: { ...editUmkmModal.data, 'Catatan': e.target.value } })} />
+                  <textarea className="clean-input" style={{ width: '100%', minHeight: '40px', resize: 'vertical', boxSizing: 'border-box' }} value={editUsahaModal.data['Catatan'] || ''} onChange={e => setEditUsahaModal({ ...editUsahaModal, data: { ...editUsahaModal.data, 'Catatan': e.target.value } })} />
                 </div>
 
               </div>
 
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', padding: '12px 24px', background: '#f9fafb', borderTop: '1px solid #e5e7eb', flexShrink: 0 }}>
-                <button type="button" onClick={() => setEditUmkmModal({ isOpen: false, data: null })} className="btn-cancel" disabled={isLoading}>Batal</button>
+                <button type="button" onClick={() => setEditUsahaModal({ isOpen: false, data: null })} className="btn-cancel" disabled={isLoading}>Batal</button>
                 <button type="submit" className="btn-confirm info" disabled={isLoading}>{isLoading ? 'Menyimpan...' : 'Simpan Perubahan'}</button>
               </div>
 
@@ -999,7 +999,7 @@ const AdminDashboard = () => {
       )}
 
       <header className="clean-header">
-        <div className="brand-logo">Dashboard UMKM Kelurahan Ploso</div>
+        <div className="brand-logo">Dashboard Usaha Kelurahan Ploso</div>
         
         {/* Tombol Hamburger Khusus Mobile */}
         <button className="mobile-menu-btn" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
@@ -1011,7 +1011,7 @@ const AdminDashboard = () => {
             Beranda
           </button>
           <button className={`nav-tab ${activeTab === 'map' ? 'active' : ''}`} onClick={() => { setActiveTab('map'); setIsMobileMenuOpen(false); }}>
-            Peta UMKM
+            Peta Usaha
           </button>
           <button className={`nav-tab ${activeTab === 'data' ? 'active' : ''}`} onClick={() => { setActiveTab('data'); setIsMobileMenuOpen(false); }}>
             Data
@@ -1030,15 +1030,15 @@ const AdminDashboard = () => {
             
             <section className="hero-section">
               <h1 className="hero-title">
-                Melacak Data UMKM,<br/>
+                Melacak Data Usaha,<br/>
                 <span className="highlight-yellow">Satu Usaha Sekaligus.</span>
               </h1>
               <p className="hero-desc">
-                Sistem Informasi Pendataan UMKM memberikan pandangan komprehensif terkait sebaran, legalitas, dan adopsi digitalisasi usaha di tingkat akar rumput Kelurahan Ploso.
+                Sistem Informasi Pendataan Usaha memberikan pandangan komprehensif terkait sebaran, legalitas, dan adopsi digitalisasi usaha di tingkat akar rumput Kelurahan Ploso.
               </p>
             </section>
 
-            <KPICards dataTarget={dataUmkm} />
+            <KPICards dataTarget={dataUsaha} />
 
             {/* ROW 2: Peta & Bar Chart RW */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px' }}>
@@ -1060,7 +1060,7 @@ const AdminDashboard = () => {
                 
                 {/* Switcher Metrik Bar Chart */}
                 <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', flexWrap: 'wrap' }}>
-                  <button className={`btn-metric ${barChartMetric === 'jumlah' ? 'active' : ''}`} onClick={() => setBarChartMetric('jumlah')}>Jumlah UMKM</button>
+                  <button className={`btn-metric ${barChartMetric === 'jumlah' ? 'active' : ''}`} onClick={() => setBarChartMetric('jumlah')}>Jumlah Usaha</button>
                   <button className={`btn-metric ${barChartMetric === 'nib' ? 'active' : ''}`} onClick={() => setBarChartMetric('nib')}>% Ber-NIB</button>
                   <button className={`btn-metric ${barChartMetric === 'qris' ? 'active' : ''}`} onClick={() => setBarChartMetric('qris')}>% Punya QRIS</button>
                 </div>
@@ -1097,11 +1097,11 @@ const AdminDashboard = () => {
               {/* Bar Chart Alasan Belum NIB */}
               <div className="content-card" style={{ padding: '24px' }}>
                 <h2 className="section-title" style={{ fontSize: '18px', marginBottom: '8px' }}>Kendala NIB</h2>
-                <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '24px' }}>Alasan utama UMKM belum memiliki Nomor Induk Berusaha.</p>
+                <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '24px' }}>Alasan utama Usaha belum memiliki Nomor Induk Berusaha.</p>
                 
                 <div className="barchart-wrapper">
                   {alasanNibData.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '40px', color: '#9ca3af' }}>Semua UMKM sudah ber-NIB.</div>
+                    <div style={{ textAlign: 'center', padding: '40px', color: '#9ca3af' }}>Semua Usaha sudah ber-NIB.</div>
                   ) : (
                     alasanNibData.map((d, i) => (
                       <div key={i} className="barchart-row">
@@ -1119,7 +1119,7 @@ const AdminDashboard = () => {
               {/* Progress Bar Antusiasme Fasilitasi */}
               <div className="content-card" style={{ padding: '24px' }}>
                 <h2 className="section-title" style={{ fontSize: '18px', marginBottom: '8px' }}>Potensi Fasilitasi Desa</h2>
-                <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '32px' }}>Tingkat antusiasme UMKM yang belum memiliki NIB/QRIS namun bersedia difasilitasi pembuatannya.</p>
+                <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '32px' }}>Tingkat antusiasme Usaha yang belum memiliki NIB/QRIS namun bersedia difasilitasi pembuatannya.</p>
 
                 <div style={{ marginBottom: '24px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
@@ -1129,7 +1129,7 @@ const AdminDashboard = () => {
                   <div className="progress-track" style={{ height: '12px' }}>
                     <div className="progress-fill" style={{ width: `${pctMauNib}%`, background: '#2563eb' }}></div>
                   </div>
-                  <p style={{ fontSize: '13px', color: '#6b7280', marginTop: '8px' }}>{mauNib} dari {totalBelumNib} UMKM non-NIB bersedia diuruskan.</p>
+                  <p style={{ fontSize: '13px', color: '#6b7280', marginTop: '8px' }}>{mauNib} dari {totalBelumNib} Usaha non-NIB bersedia diuruskan.</p>
                 </div>
 
                 <div>
@@ -1140,7 +1140,7 @@ const AdminDashboard = () => {
                   <div className="progress-track" style={{ height: '12px' }}>
                     <div className="progress-fill" style={{ width: `${pctMauQris}%`, background: '#7c3aed' }}></div>
                   </div>
-                  <p style={{ fontSize: '13px', color: '#6b7280', marginTop: '8px' }}>{mauQris} dari {totalBelumQris} UMKM non-QRIS bersedia dibuatkan.</p>
+                  <p style={{ fontSize: '13px', color: '#6b7280', marginTop: '8px' }}>{mauQris} dari {totalBelumQris} Usaha non-QRIS bersedia dibuatkan.</p>
                 </div>
               </div>
 
@@ -1153,7 +1153,7 @@ const AdminDashboard = () => {
           <div style={{ animation: 'popIn 0.4s ease' }}>
             <div className="content-card" style={{ padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
               <div style={{ padding: '32px 32px 16px 32px' }}>
-                <h2 className="section-title">Eksplorasi Peta Kepadatan UMKM</h2>
+                <h2 className="section-title">Eksplorasi Peta Kepadatan Usaha</h2>
                 <p style={{ color: '#4E4E4E', fontSize: '15px', margin: '0 0 24px 0' }}>Filter data berdasarkan wilayah untuk melihat persebaran secara spesifik.</p>
                 <FilterControls />
               </div>
@@ -1234,7 +1234,7 @@ const AdminDashboard = () => {
                           <td style={{ textAlign: 'right', minWidth: '100px' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
                               <button className="btn-action" style={{ background: '#f3f4f6', color: '#1a1a1b', border: '1px solid #d1d5db' }} onClick={() => {
-                                setEditUmkmModal({ isOpen: true, data: { ...item, oldNamaUsaha: item['Nama Usaha'] }});
+                                setEditUsahaModal({ isOpen: true, data: { ...item, oldNamaUsaha: item['Nama Usaha'] }});
                               }}>
                                 Edit
                               </button>
@@ -1277,17 +1277,17 @@ const AdminDashboard = () => {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '32px' }}>
               <div className="content-card">
                 <h2 className="section-title" style={{ fontSize: '20px' }}>Konfigurasi Target Kelurahan</h2>
-                <p style={{ color: '#4E4E4E', fontSize: '14px', marginBottom: '24px' }}>Ubah estimasi total populasi UMKM untuk menyesuaikan kalkulasi persentase pencapaian (Progress Bar).</p>
+                <p style={{ color: '#4E4E4E', fontSize: '14px', marginBottom: '24px' }}>Ubah estimasi total populasi Usaha untuk menyesuaikan kalkulasi persentase pencapaian (Progress Bar).</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <label style={{ fontWeight: 600, fontSize: '14px', color: '#4b5563' }}>Estimasi Target (Unit)</label>
                   <input 
                     type="number" 
                     className="clean-input" 
-                    value={targetUmkm} 
-                    onChange={(e) => setTargetUmkm(e.target.value)} 
+                    value={targetUsaha} 
+                    onChange={(e) => setTargetUsaha(e.target.value)} 
                     style={{ maxWidth: '200px' }}
                   />
-                  <button className="btn-action btn-primary" style={{ marginTop: '12px', width: 'fit-content' }} onClick={() => openAlert("Tersimpan", "Target UMKM berhasil diperbarui.", "success")}>
+                  <button className="btn-action btn-primary" style={{ marginTop: '12px', width: 'fit-content' }} onClick={() => openAlert("Tersimpan", "Target Usaha berhasil diperbarui.", "success")}>
                     Simpan Perubahan
                   </button>
                 </div>
