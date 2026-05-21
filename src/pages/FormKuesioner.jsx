@@ -239,6 +239,14 @@ const FormKuesioner = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    // Validasi khusus untuk noHp: Hanya angka
+    if (name === 'noHp') {
+      const onlyNums = value.replace(/[^0-9]/g, '');
+      setFormData(prev => ({ ...prev, noHp: onlyNums }));
+      return; // Berhenti di sini agar tidak mengupdate state dengan format salah
+    }
+
     if (name === 'rw') {
       setFormData(prev => ({ ...prev, rw: value, rt: '' }));
     } else {
@@ -517,7 +525,21 @@ const FormKuesioner = () => {
                   </div>
                   <div className="input-group">
                     <label>Nomor HP Pemilik/Pengelola (Opsional)</label>
-                    <input type="tel" name="noHp" value={formData.noHp} onChange={handleChange} className="pintarly-input" placeholder="08xxxxxxxxxx" />
+                    <input 
+                      type="tel" 
+                      name="noHp" 
+                      value={formData.noHp} 
+                      onChange={handleChange} 
+                      className="pintarly-input" 
+                      placeholder="08xxxxxxxxxx" 
+                      maxLength="13" // Maksimal 13 digit
+                    />
+                    {/* Pesan validasi jika diisi tapi kurang dari 12 digit */}
+                    {formData.noHp.length > 0 && (formData.noHp.length < 12 || formData.noHp.length > 13) && (
+                      <span className="note" style={{ color: '#ef4444' }}>
+                        Nomor HP harus terdiri dari 12 atau 13 digit angka.
+                      </span>
+                    )}
                   </div>
                 </div>
               )}
@@ -529,7 +551,7 @@ const FormKuesioner = () => {
                   <p className="step-desc">Informasi terkait nama dan letak fisik bangunan usaha</p>
                   <div className="input-group">
                     <label>Nama Usaha</label>
-                    <input type="text" name="namaUsaha" value={formData.namaUsaha} onChange={handleChange} required className="pintarly-input" placeholder="Contoh: Bengkel, Warung, Toko..." autoFocus />
+                    <input type="text" name="namaUsaha" value={formData.namaUsaha} onChange={handleChange} required className="pintarly-input" placeholder="Contoh: Bengkel Samudra Jaya, Warung Berkah, Toko..." autoFocus />
                   </div>
                   <div className="input-group">
                     <label>Alamat Usaha</label>
@@ -603,7 +625,7 @@ const FormKuesioner = () => {
                   <p className="step-desc">Tentukan deskripsi serta kategori makro KBLI 2025.</p>
                   <div className="input-group">
                     <label>Kegiatan Utama</label>
-                    <textarea name="deskripsiUsaha" value={formData.deskripsiUsaha} onChange={handleChange} required className="pintarly-input" placeholder="Misal: Menjual sembako dan makanan ringan..." autoFocus />
+                    <textarea name="deskripsiUsaha" value={formData.deskripsiUsaha} onChange={handleChange} required className="pintarly-input" placeholder="Misal: Menyediakan makanan dan minuman siap saji..." autoFocus />
                   </div>
                   <div className="input-group">
                     <label>Kategori KBLI 2025</label>
@@ -778,7 +800,7 @@ const FormKuesioner = () => {
                 <button type="submit" className="btn-primary" 
                   disabled={
                     (step === 1 && !formData.namaPetugas) ||
-                    (step === 2 && (!formData.namaPemilik || !formData.alamatPemilik)) ||
+                    (step === 2 && (!formData.namaPemilik || !formData.alamatPemilik || (formData.noHp !== '' && (formData.noHp.length < 12 || formData.noHp.length > 13)))) ||
                     (step === 3 && (!formData.namaUsaha || !formData.alamat || !formData.rt || !formData.rw)) ||
                     (step === 4 && !previewUsaha) ||
                     (step === 5 && (!formData.kbli || !formData.deskripsiUsaha)) ||

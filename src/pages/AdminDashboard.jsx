@@ -188,7 +188,7 @@ const AdminDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   
-  const [targetUsaha, setTargetUsaha] = useState(500);
+  const [targetUsaha, setTargetUsaha] = useState(250);
   const centerPloso = [-8.2050, 111.1050];
   const [barChartMetric, setBarChartMetric] = useState('jumlah');
 
