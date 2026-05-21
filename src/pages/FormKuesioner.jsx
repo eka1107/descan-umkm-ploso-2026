@@ -33,26 +33,16 @@ const FullscreenIcon = () => (
 const ExitFullscreenIcon = () => (
   <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
 );
-const DesaCantikLogo = () => (
-  <svg className="spinner-cantik" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-    <polyline points="9 22 9 12 15 12 15 22"></polyline>
-    <path d="M12 2v3"></path>
-    <path d="M10 4.5l2-2.5 2 2.5"></path>
-  </svg>
-);
 
-// --- KOMPONEN CUSTOM MODAL POP-UP (Elegan & Selaras Tema) ---
-// --- KOMPONEN CUSTOM MODAL POP-UP (Elegan & Selaras Tema) ---
+// --- KOMPONEN CUSTOM MODAL POP-UP ---
 const CustomModal = ({ isOpen, title, message, type = 'info', onConfirm, onCancel }) => {
   if (!isOpen) return null;
 
-  // Setelan warna dinamis (Success = Hijau Gelap)
   let bgColor = '#ecfdf5';
-  let textColor = '#007D60'; // Hijau gelap
+  let textColor = '#007D60'; 
   let icon = '✓';
   let btnText = 'Selesai';
-  let btnBg = '#007D60'; // Hijau gelap
+  let btnBg = '#007D60'; 
 
   if (type === 'error') {
     bgColor = '#fef2f2'; textColor = '#ef4444'; icon = '✕'; btnText = 'Perbaiki'; btnBg = '#ef4444';
@@ -119,7 +109,6 @@ const isPointInMultiPolygon = (point, geometry) => {
   return inside;
 };
 
-// Kustomisasi Style React Select
 const customSelectStyles = {
   control: (provided, state) => ({
     ...provided, padding: '2px', borderRadius: '8px', border: state.isFocused ? '2px solid #ffe16f' : '2px solid #e5e7eb',
@@ -130,20 +119,15 @@ const customSelectStyles = {
   menuPortal: base => ({ ...base, zIndex: 9999 })
 };
 
-// --- KOMPONEN BANTUAN UNTUK PETA (Otomatis atur ukuran saat Fullscreen) ---
 function MapResizer({ isFullscreen }) {
   const map = useMap();
   useEffect(() => {
-    // Memicu recalculate size saat animasi transisi CSS layar penuh selesai
-    const timer = setTimeout(() => {
-      map.invalidateSize();
-    }, 300);
+    const timer = setTimeout(() => { map.invalidateSize(); }, 300);
     return () => clearTimeout(timer);
   }, [isFullscreen, map]);
   return null;
 }
 
-// Komponen interaktif drag marker
 function LocationMarker({ position, setPosition, setFormData }) {
   const markerRef = useRef(null);
   const map = useMapEvents({
@@ -174,12 +158,11 @@ const FormKuesioner = () => {
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0TqenZVn-sDlSklA8eesYb08aE2uE7q9Wnvt5OCw-Y20ABr84PNmuEe4T6Nz-vlNf/exec';
   
   const [step, setStep] = useState(1);
-  const totalSteps = 7;
+  const totalSteps = 8;
   const [waktuMulai, setWaktuMulai] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [listPetugas, setListPetugas] = useState([]);
   
-  // State Peta & Opsi RT/RW
   const [mapRef, setMapRef] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [rwList, setRwList] = useState([]);
@@ -188,16 +171,14 @@ const FormKuesioner = () => {
   
   const [mapPosition, setMapPosition] = useState({ lat: -8.1990, lng: 111.1070 });
   const [previewUsaha, setPreviewUsaha] = useState(null);
-  const [previewQris, setPreviewQris] = useState(null);
 
   const [modal, setModal] = useState({ isOpen: false, type: 'success', title: '', message: '' });
 
   const [formData, setFormData] = useState({
-    namaPetugas: '', namaUsaha: '', deskripsiUsaha: '', alamat: '', rt: '', rw: '', noHp: '',
+    namaPetugas: '', namaPemilik: '', alamatPemilik: '', namaUsaha: '', deskripsiUsaha: '', alamat: '', rt: '', rw: '', noHp: '',
     fotoUsahaBase64: '', fotoUsahaMimeType: '', 
     kbli: '', punyaNib: '', nomorNib: '', alasanTidakNib: '', urusNib: '',
-    punyaQris: '', urusQris: '', lokasi: '-8.1990, 111.1070', catatan: '', 
-    fotoQrisBase64: '', fotoQrisMimeType: ''
+    punyaQris: '', urusQris: '', lokasi: '-8.1990, 111.1070', catatan: ''
   });
 
   const nibRefs = useRef([]);
@@ -205,7 +186,6 @@ const FormKuesioner = () => {
   useEffect(() => {
     setWaktuMulai(new Date().toISOString());
     
-    // Tarik list RT/RW secara Hierarkis dari file JSON GeoJSON
     if (plosoGeojson && plosoGeojson.features) {
       const mapData = {};
       plosoGeojson.features.forEach(f => {
@@ -241,7 +221,6 @@ const FormKuesioner = () => {
       .catch(err => console.error("Gagal ambil data petugas", err));
   }, []);
 
-  // Update polygon area target saat RT/RW berubah
   useEffect(() => {
     if (formData.rt && formData.rw) {
       const feature = plosoGeojson.features.find(f => {
@@ -267,22 +246,15 @@ const FormKuesioner = () => {
     }
   };
 
-  const handleKbliChange = (selectedOption) => setFormData({ ...formData, kbli: selectedOption ? selectedOption.label : '' });
+  const handleKbliChange = (selectedOption) => setFormData({ ...formData, kbli: selectedOption ? (selectedOption.label || selectedOption.value) : '' });
 
   const handleFileUpload = (e, type) => {
     const file = e.target.files[0];
-    if (file) {
-      const objectUrl = URL.createObjectURL(file);
-      if (type === 'usaha') setPreviewUsaha(objectUrl);
-      if (type === 'qris') setPreviewQris(objectUrl);
-
+    if (file && type === 'usaha') {
+      setPreviewUsaha(URL.createObjectURL(file));
       const reader = new FileReader();
       reader.onloadend = () => {
-        if (type === 'qris') {
-          setFormData(prev => ({ ...prev, fotoQrisBase64: reader.result.split(',')[1], fotoQrisMimeType: file.type }));
-        } else if (type === 'usaha') {
-          setFormData(prev => ({ ...prev, fotoUsahaBase64: reader.result.split(',')[1], fotoUsahaMimeType: file.type }));
-        }
+        setFormData(prev => ({ ...prev, fotoUsahaBase64: reader.result.split(',')[1], fotoUsahaMimeType: file.type }));
       };
       reader.readAsDataURL(file);
     }
@@ -324,7 +296,7 @@ const FormKuesioner = () => {
 
   const nextStep = (e) => { 
     e.preventDefault(); 
-    if (step === 5 && formData.punyaNib === 'Ya' && !isNibValid) {
+    if (step === 6 && formData.punyaNib === 'Ya' && !isNibValid) {
       setModal({ isOpen: true, type: 'error', title: 'Format NIB Salah', message: 'Nomor Induk Berusaha (NIB) wajib diisi tepat 13 digit angka.' });
       return;
     }
@@ -332,7 +304,6 @@ const FormKuesioner = () => {
   };
   const prevStep = () => setStep(prev => prev - 1);
 
-  // --- KONTROL PETA (Fokus Wilayah & GPS) ---
   const flyToRegion = () => {
     if (mapRef && selectedFeature) {
       const layer = L.geoJSON(selectedFeature);
@@ -355,18 +326,12 @@ const FormKuesioner = () => {
       );
     }
   };
-  const closeOnlyModal = () => {
-    setModal(prev => ({ ...prev, isOpen: false }));
-  };
-  // 2. FUNGSI TUTUP SUKSES (BARU RELOAD/RESET KUESIONER)
-  const closeSuccessModal = () => {
-    window.location.reload(); 
-  };
 
-  // 2. FUNGSI UNTUK MENGIRIM DATA (JALAN JIKA DIKLIK YAKIN PADA KONFIRMASI)
-  // 3. FUNGSI KIRIM DATA (Jalan jika klik "Kirim Sekarang")
+  const closeOnlyModal = () => setModal(prev => ({ ...prev, isOpen: false }));
+  const closeSuccessModal = () => window.location.reload(); 
+
   const executeSubmit = async () => {
-    closeOnlyModal(); // Tutup pop-up konfirmasi dengan aman
+    closeOnlyModal(); 
     setIsLoading(true);
     const payload = { ...formData, waktuMulai, waktuSelesai: new Date().toISOString() };
     
@@ -376,7 +341,6 @@ const FormKuesioner = () => {
       if (typeof resData === 'string') { try { resData = JSON.parse(resData); } catch(e) {} }
       
       if (resData && resData.status === 'success') {
-        // Jika sukses, panggil closeSuccessModal yang me-reload halaman
         setModal({ isOpen: true, type: 'success', title: 'Berhasil Disimpan', message: 'Data usaha telah berhasil direkam ke dalam database kelurahan.', onConfirm: closeSuccessModal });
       } else {
         setModal({ isOpen: true, type: 'error', title: 'Gagal di Server', message: resData.message || 'Terjadi kesalahan saat memproses data.', onConfirm: closeOnlyModal });
@@ -388,11 +352,8 @@ const FormKuesioner = () => {
     }
   };
 
-  // 4. FUNGSI SUBMIT TAHAP 7 (Memunculkan Pop-Up Konfirmasi)
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // Validasi Peta
     if (selectedFeature) {
       const isInside = isPointInMultiPolygon([mapPosition.lng, mapPosition.lat], selectedFeature.geometry);
       if (!isInside) {
@@ -404,15 +365,10 @@ const FormKuesioner = () => {
         return; 
       }
     }
-
-    // Panggil Pop-Up Konfirmasi
     setModal({
-      isOpen: true,
-      type: 'confirm',
-      title: 'Kirim Kuesioner?',
+      isOpen: true, type: 'confirm', title: 'Kirim Kuesioner?',
       message: 'Apakah Anda yakin semua isian data dan foto yang diunggah sudah benar?',
-      onConfirm: executeSubmit,
-      onCancel: closeOnlyModal // <--- JIKA BATAL, HANYA TUTUP POP-UP, TIDAK RESET
+      onConfirm: executeSubmit, onCancel: closeOnlyModal 
     });
   };
 
@@ -423,11 +379,9 @@ const FormKuesioner = () => {
         
         body, html { margin: 0; padding: 0; width: 100vw; height: 100dvh; font-family: 'Inter', sans-serif; color: #1a1a1b; -webkit-tap-highlight-color: transparent; overflow: hidden; }
         
-        /* BACKGROUND ABU-ABU GRADASI KASAR/GRAIN */
         .app-container { height: 100dvh; width: 100%; display: flex; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box; background: linear-gradient(135deg, #e5e7eb 0%, #f3f4f6 100%); position: relative; }
         .app-container::after { content: ""; position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.15; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"); }
         
-        /* KARTU FORM (SUDUT SEMI-SQUARE) */
         .form-card { width: 100%; max-width: 440px; background: #ffffff; border-radius: 12px; padding: 32px 24px; box-shadow: 0 16px 40px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; position: relative; display: flex; flex-direction: column; box-sizing: border-box; animation: slideUp 0.3s ease-out; max-height: calc(100dvh - 32px); z-index: 10; border-top: 6px solid #ffe16f; }
         .form-wrapper { display: flex; flex-direction: column; overflow: hidden; }
         .form-content { overflow-y: auto; padding-right: 4px; scrollbar-width: none; -ms-overflow-style: none; }
@@ -442,7 +396,6 @@ const FormKuesioner = () => {
         label { display: block; font-size: 13px; font-weight: 700; color: #4b5563; margin-bottom: 6px; }
         .input-group { margin-bottom: 16px; }
         
-        /* INPUT & BUTTONS (SEMI-ROUNDED) */
         .pintarly-input { width: 100%; padding: 12px 16px; border-radius: 8px; border: 1px solid #d1d5db; background-color: #f9fafb; font-size: 15px; color: #1a1a1b; font-family: 'Inter', sans-serif; box-sizing: border-box; transition: all 0.2s ease; outline: none; appearance: none; }
         .pintarly-input:disabled { background-color: #f3f4f6; cursor: not-allowed; }
         .pintarly-input:focus:not(:disabled) { border-color: #ffe16f; background-color: #ffffff; box-shadow: 0 0 0 4px rgba(255, 225, 111, 0.2); }
@@ -461,13 +414,10 @@ const FormKuesioner = () => {
         
         @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* PETA NORMAL & FULLSCREEN */
         .map-wrapper { height: 220px; width: 100%; border-radius: 8px; overflow: hidden; border: 1px solid #d1d5db; margin-bottom: 12px; z-index: 1; display: flex; position: relative; transition: all 0.3s ease; }
         @media(min-height: 700px) { .map-wrapper { height: 260px; } }
-        
         .map-wrapper.fullscreen { position: fixed !important; inset: 0 !important; width: 100vw !important; height: 100dvh !important; z-index: 99999 !important; border-radius: 0 !important; margin: 0 !important; }
         
-        /* Indikator Validasi GeoJSON di Peta & Tombol Bantuan */
         .map-validation-badge { position: absolute; top: 12px; left: 12px; z-index: 1000; background: rgba(255,255,255,0.95); padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; border: 1px solid #d1d5db; color: #1a1a1b; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
         .map-validation-badge.active { border-color: #10b981; color: #059669; }
         .map-validation-badge.active:hover { background: #ecfdf5; border-color: #059669; }
@@ -494,7 +444,6 @@ const FormKuesioner = () => {
         .nib-box:focus { border-color: #ffe16f; background: #fff; box-shadow: 0 0 0 3px rgba(255, 225, 111, 0.2); }
         .nib-error { border-color: #ef4444 !important; }
 
-        /* LOADER DESA CANTIK */
         .loader-overlay { position: fixed; inset: 0; z-index: 9999999; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); display: flex; flex-direction: column; align-items: center; justify-content: center; animation: fadeIn 0.3s ease; }
         .spinner-cantik { width: 80px; height: 80px; color: #ffe16f; animation: spin 2.5s linear infinite, pulse 1.5s ease-in-out infinite alternate; filter: drop-shadow(0 4px 12px rgba(255, 225, 111, 0.5)); }
         .loader-title { font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 800; color: #1a1a1b; margin: 24px 0 8px 0; letter-spacing: -0.5px; }
@@ -506,7 +455,6 @@ const FormKuesioner = () => {
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
       `}</style>
 
-      {/* FULLSCREEN LOADER DESA CANTIK */}
       {isLoading && (
         <div className="loader-overlay">
           <img src="/logo_ploso.png" alt="Logo Desa Cantik" style={{ height: '70px', objectFit: 'contain' }} />
@@ -520,39 +468,13 @@ const FormKuesioner = () => {
 
         <div className="form-card" style={{ transform: isFullscreen ? 'none' : '' }}>
           
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '12px', 
-            marginBottom: '24px', 
-            padding: '8px 0',
-            borderBottom: '1px solid #f3f4f6' 
-          }}>
-          <img src="/logo_ploso.png" alt="Logo Desa Cantik" style={{ height: '48px', objectFit: 'contain' }} />
-          
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <h1 style={{ 
-              margin: 0, 
-              fontSize: '20px', 
-              fontWeight: '800', 
-              fontFamily: 'Outfit, sans-serif', 
-              color: '#1a1a1b',
-              letterSpacing: '-0.5px' 
-            }}>
-              PUSAKA
-            </h1>
-            <p style={{ 
-              margin: 0, 
-              fontSize: '12px', 
-              color: '#6b7280', 
-              fontWeight: '500' 
-            }}>
-              Pendataan Usaha Kelurahan Ploso
-            </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px', padding: '8px 0', borderBottom: '1px solid #f3f4f6' }}>
+            <img src="/logo_ploso.png" alt="Logo Desa Cantik" style={{ height: '48px', objectFit: 'contain' }} />
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <h1 style={{ margin: 0, fontSize: '20px', fontWeight: '800', fontFamily: 'Outfit, sans-serif', color: '#1a1a1b', letterSpacing: '-0.5px' }}>PUSAKA</h1>
+              <p style={{ margin: 0, fontSize: '12px', color: '#6b7280', fontWeight: '500' }}>Pendataan Usaha Kelurahan Ploso</p>
+            </div>
           </div>
-        </div>
-          
-         
           
           <div className="progress-container">
              <div className="step-badge" style={{ top: '32px' }}>Tahap {step}/{totalSteps}</div>
@@ -560,17 +482,13 @@ const FormKuesioner = () => {
           </div>
 
           <form onSubmit={step === totalSteps ? handleSubmit : nextStep} className="form-wrapper">
-            
             <div className="form-content">
+              
+              {/* TAHAP 1 */}
               {step === 1 && (
                 <div style={{ animation: 'slideUp 0.3s ease' }}>
                   <h2 className="step-title">Mulai Pendataan</h2>
-                  <p className="step-desc">
-                    Pilih nama Anda sebagai petugas agen statistik
-                    <span style={{ backgroundColor: '#ffe16f', color: '#1a1a1b', padding: '2px 6px', borderRadius: '4px', fontWeight: '600' }}>
-                    Kelurahan Ploso
-                    </span>
-                  </p>
+                  <p className="step-desc">Pilih nama Anda sebagai petugas agen statistik <span style={{ backgroundColor: '#ffe16f', color: '#1a1a1b', padding: '2px 6px', borderRadius: '4px', fontWeight: '600' }}>Kelurahan Ploso</span></p>
                   <div className="input-group">
                     <label>Nama Petugas</label>
                     <select name="namaPetugas" value={formData.namaPetugas} onChange={handleChange} required className="pintarly-input" style={{ backgroundColor: '#fff' }}>
@@ -584,20 +502,58 @@ const FormKuesioner = () => {
                 </div>
               )}
 
+              {/* TAHAP 2 */}
               {step === 2 && (
                 <div style={{ animation: 'slideUp 0.3s ease' }}>
+                  <h2 className="step-title">Identitas Pemilik</h2>
+                  <p className="step-desc">Detail informasi kontak pengelola atau pemilik usaha</p>
+                  <div className="input-group">
+                    <label>Nama Pemilik Usaha</label>
+                    <input type="text" name="namaPemilik" value={formData.namaPemilik} onChange={handleChange} required className="pintarly-input" placeholder="Masukkan nama lengkap pemilik..." autoFocus />
+                  </div>
+                  <div className="input-group">
+                    <label>Alamat Pemilik Usaha</label>
+                    <textarea name="alamatPemilik" value={formData.alamatPemilik} onChange={handleChange} required className="pintarly-input" placeholder="Masukkan alamat lengkap domisili pemilik usaha..." rows="2" />
+                  </div>
+                  <div className="input-group">
+                    <label>Nomor HP Pemilik/Pengelola (Opsional)</label>
+                    <input type="tel" name="noHp" value={formData.noHp} onChange={handleChange} className="pintarly-input" placeholder="08xxxxxxxxxx" />
+                  </div>
+                </div>
+              )}
+
+              {/* TAHAP 3 */}
+              {step === 3 && (
+                <div style={{ animation: 'slideUp 0.3s ease' }}>
                   <h2 className="step-title">Identitas Usaha</h2>
-                  <p className="step-desc">Detail informasi lokasi dan kontak dasar usaha</p>
+                  <p className="step-desc">Informasi terkait nama dan letak fisik bangunan usaha</p>
                   <div className="input-group">
                     <label>Nama Usaha</label>
-                    <input type="text" name="namaUsaha" value={formData.namaUsaha} onChange={handleChange} required className="pintarly-input" placeholder="Contoh: Bengkel Motor Samudra Jaya, Warung Makan Berkah, Sate Pak Tono" autoFocus />
+                    <input type="text" name="namaUsaha" value={formData.namaUsaha} onChange={handleChange} required className="pintarly-input" placeholder="Contoh: Bengkel, Warung, Toko..." autoFocus />
                   </div>
                   <div className="input-group">
                     <label>Alamat Usaha</label>
                     <input type="text" name="alamat" value={formData.alamat} onChange={handleChange} required className="pintarly-input" placeholder="Nama Jalan / Gang" />
+                    {/* BARU: Checkbox Alamat Sama */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px' }}>
+                      <input 
+                        type="checkbox" 
+                        id="alamatSama"
+                        checked={formData.alamat !== '' && formData.alamat === formData.alamatPemilik}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setFormData(prev => ({ ...prev, alamat: prev.alamatPemilik }));
+                          } else {
+                            setFormData(prev => ({ ...prev, alamat: '' }));
+                          }
+                        }}
+                        style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#007D60' }}
+                      />
+                      <label htmlFor="alamatSama" style={{ margin: 0, fontSize: '13px', fontWeight: 500, color: '#4b5563', cursor: 'pointer', textTransform: 'none' }}>
+                        Alamat usaha sama dengan alamat pemilik
+                      </label>
+                    </div>
                   </div>
-                  
-                  {/* DROPDOWN BERTINGKAT RW -> RT */}
                   <div className="flex-row input-group">
                     <div className="w-half">
                       <label>RW</label>
@@ -616,15 +572,11 @@ const FormKuesioner = () => {
                       </select>
                     </div>
                   </div>
-
-                  <div className="input-group">
-                    <label>Nomor HP Pengelola Usaha (Opsional)</label>
-                    <input type="tel" name="noHp" value={formData.noHp} onChange={handleChange} className="pintarly-input" placeholder="08xxxxxxxxxx" />
-                  </div>
                 </div>
               )}
 
-              {step === 3 && (
+              {/* TAHAP 4 */}
+              {step === 4 && (
                 <div style={{ animation: 'slideUp 0.3s ease' }}>
                   <h2 className="step-title">Foto Usaha</h2>
                   <p className="step-desc">Ambil foto produk atau tampak depan bangunan usaha</p>
@@ -644,7 +596,8 @@ const FormKuesioner = () => {
                 </div>
               )}
 
-              {step === 4 && (
+              {/* TAHAP 5 */}
+              {step === 5 && (
                 <div style={{ animation: 'slideUp 0.3s ease' }}>
                   <h2 className="step-title">Klasifikasi Usaha</h2>
                   <p className="step-desc">Tentukan deskripsi serta kategori makro KBLI 2025.</p>
@@ -654,17 +607,16 @@ const FormKuesioner = () => {
                   </div>
                   <div className="input-group">
                     <label>Kategori KBLI 2025</label>
-                    <Select options={kbliOptions} onChange={handleKbliChange} styles={customSelectStyles} placeholder="Cari kategori..." isClearable isSearchable required menuPortalTarget={document.body} />
+                    <Select options={kbliOptions} value={kbliOptions.find(o => o.value === formData.kbli || o.label === formData.kbli) || null} onChange={handleKbliChange} styles={customSelectStyles} placeholder="Cari kategori..." isClearable isSearchable required menuPortalTarget={document.body} />
                   </div>
                 </div>
               )}
 
-              {step === 5 && (
+              {/* TAHAP 6 */}
+              {step === 6 && (
                 <div style={{ animation: 'slideUp 0.3s ease' }}>
                   <h2 className="step-title">Legalitas (NIB)</h2>
-                  <p className="step-desc">Pendataan status kepemilikan <span style={{ backgroundColor: '#ffe16f', color: '#1a1a1b', padding: '2px 2px', borderRadius: '0px', fontWeight: '600' }}>
-                    Nomor Induk Berusaha
-                    </span></p>
+                  <p className="step-desc">Pendataan status kepemilikan <span style={{ backgroundColor: '#ffe16f', color: '#1a1a1b', padding: '2px 2px', borderRadius: '0px', fontWeight: '600' }}>Nomor Induk Berusaha</span></p>
                   <div className="input-group">
                     <label>Apakah memiliki NIB?</label>
                     <select name="punyaNib" value={formData.punyaNib} onChange={handleChange} required className="pintarly-input" style={{ backgroundColor: '#fff' }}>
@@ -681,28 +633,28 @@ const FormKuesioner = () => {
                         <div className="nib-group">
                           {[0, 1, 2].map(i => {
                             const val = formData.nomorNib[i] && formData.nomorNib[i] !== ' ' ? formData.nomorNib[i] : '';
-                            return <input key={i} ref={el => nibRefs.current[i] = el} type="text" maxLength="1" value={val} onChange={(e) => handleNibInput(i, e)} onKeyDown={(e) => handleNibKeyDown(i, e)} className={`nib-box ${!isNibValid && formData.nomorNib.trim() !== '' ? 'nib-error' : ''}`} />;
+                            return <input key={i} ref={el => nibRefs.current[i] = el} type="text" inputMode="numeric" pattern="[0-9]*" maxLength="1" value={val} onChange={(e) => handleNibInput(i, e)} onKeyDown={(e) => handleNibKeyDown(i, e)} className={`nib-box ${!isNibValid && formData.nomorNib.trim() !== '' ? 'nib-error' : ''}`} />;
                           })}
                         </div>
                         <div className="nib-space"></div>
                         <div className="nib-group">
                           {[3, 4, 5].map(i => {
                             const val = formData.nomorNib[i] && formData.nomorNib[i] !== ' ' ? formData.nomorNib[i] : '';
-                            return <input key={i} ref={el => nibRefs.current[i] = el} type="text" maxLength="1" value={val} onChange={(e) => handleNibInput(i, e)} onKeyDown={(e) => handleNibKeyDown(i, e)} className={`nib-box ${!isNibValid && formData.nomorNib.trim() !== '' ? 'nib-error' : ''}`} />;
+                            return <input key={i} ref={el => nibRefs.current[i] = el} type="text" inputMode="numeric" pattern="[0-9]*" maxLength="1" value={val} onChange={(e) => handleNibInput(i, e)} onKeyDown={(e) => handleNibKeyDown(i, e)} className={`nib-box ${!isNibValid && formData.nomorNib.trim() !== '' ? 'nib-error' : ''}`} />;
                           })}
                         </div>
                         <div className="nib-space"></div>
                         <div className="nib-group">
                           {[6, 7, 8].map(i => {
                             const val = formData.nomorNib[i] && formData.nomorNib[i] !== ' ' ? formData.nomorNib[i] : '';
-                            return <input key={i} ref={el => nibRefs.current[i] = el} type="text" maxLength="1" value={val} onChange={(e) => handleNibInput(i, e)} onKeyDown={(e) => handleNibKeyDown(i, e)} className={`nib-box ${!isNibValid && formData.nomorNib.trim() !== '' ? 'nib-error' : ''}`} />;
+                            return <input key={i} ref={el => nibRefs.current[i] = el} type="text" inputMode="numeric" pattern="[0-9]*" maxLength="1" value={val} onChange={(e) => handleNibInput(i, e)} onKeyDown={(e) => handleNibKeyDown(i, e)} className={`nib-box ${!isNibValid && formData.nomorNib.trim() !== '' ? 'nib-error' : ''}`} />;
                           })}
                         </div>
                         <div className="nib-space"></div>
                         <div className="nib-group" style={{ flex: '1.3' }}>
                           {[9, 10, 11, 12].map(i => {
                             const val = formData.nomorNib[i] && formData.nomorNib[i] !== ' ' ? formData.nomorNib[i] : '';
-                            return <input key={i} ref={el => nibRefs.current[i] = el} type="text" maxLength="1" value={val} onChange={(e) => handleNibInput(i, e)} onKeyDown={(e) => handleNibKeyDown(i, e)} className={`nib-box ${!isNibValid && formData.nomorNib.trim() !== '' ? 'nib-error' : ''}`} />;
+                            return <input key={i} ref={el => nibRefs.current[i] = el} type="text" inputMode="numeric" pattern="[0-9]*" maxLength="1" value={val} onChange={(e) => handleNibInput(i, e)} onKeyDown={(e) => handleNibKeyDown(i, e)} className={`nib-box ${!isNibValid && formData.nomorNib.trim() !== '' ? 'nib-error' : ''}`} />;
                           })}
                         </div>
                       </div>
@@ -736,7 +688,8 @@ const FormKuesioner = () => {
                 </div>
               )}
 
-              {step === 6 && (
+              {/* TAHAP 7 */}
+              {step === 7 && (
                 <div style={{ animation: 'slideUp 0.3s ease' }}>
                   <h2 className="step-title">Metode QRIS</h2>
                   <p className="step-desc">Pemanfaatan alat pembayaran digital nontunai.</p>
@@ -744,33 +697,14 @@ const FormKuesioner = () => {
                     <label>Apakah memiliki metode pembayaran QRIS?</label>
                     <select name="punyaQris" value={formData.punyaQris} onChange={handleChange} required className="pintarly-input" style={{ backgroundColor: '#fff' }}>
                       <option value="" disabled hidden>Pilih Jawaban</option>
-                      <option value="Ya">Ya, Menerima</option>
+                      <option value="Ya">Ya memiliki</option>
                       <option value="Tidak">Tidak</option>
                     </select>
                   </div>
 
-                  {formData.punyaQris === 'Ya' && (
-                    <div className="input-group" style={{ animation: 'slideUp 0.3s ease' }}>
-                      <label>Bukti / Foto QRIS</label>
-                      <div className="upload-options">
-                        <label className="upload-btn">
-                          <CameraIcon /> Kamera
-                          <input type="file" accept="image/*" capture="environment" onChange={(e) => handleFileUpload(e, 'qris')} className="upload-input" />
-                        </label>
-                        <label className="upload-btn">
-                          <GalleryIcon /> Galeri
-                          <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, 'qris')} className="upload-input" />
-                        </label>
-                      </div>
-                      <div className="preview-box" style={{ height: '110px' }}>
-                        {previewQris ? <img src={previewQris} alt="QRIS" className="preview-img" /> : <span style={{ color: '#9ca3af', fontSize: '13px' }}>Belum ada foto</span>}
-                      </div>
-                    </div>
-                  )}
-
                   {formData.punyaQris === 'Tidak' && (
                     <div className="input-group" style={{ animation: 'slideUp 0.3s ease' }}>
-                      <label>Bersedia dibuatkan QRIS?</label>
+                      <label>Bersedia dibuatkan QRIS oleh pihak kelurahan?</label>
                       <select name="urusQris" value={formData.urusQris} onChange={handleChange} required className="pintarly-input" style={{ backgroundColor: '#fff' }}>
                         <option value="" disabled hidden>Pilih</option>
                         <option value="Ya">Ya, bersedia</option>
@@ -781,49 +715,35 @@ const FormKuesioner = () => {
                 </div>
               )}
 
-              {step === 7 && (
+              {/* TAHAP 8 */}
+              {step === 8 && (
                 <div style={{ animation: 'slideUp 0.3s ease' }}>
                   <h2 className="step-title">Titik Lokasi Geografis</h2>
                   <p className="step-desc">Pastikan titik pin berada di dalam area batas kuning untuk RT {formData.rt} / RW {formData.rw}.</p>
                   
                   <div className={`map-wrapper ${isFullscreen ? 'fullscreen' : ''}`}>
-                    
-                    {/* Badge Interaktif untuk Terbang ke Area RT */}
-                    <button 
-                      type="button" 
-                      onClick={flyToRegion}
-                      title="Klik untuk fokus ke area ini"
-                      className={`map-validation-badge ${selectedFeature ? 'active' : ''}`}
-                    >
+                    <button type="button" onClick={flyToRegion} title="Klik untuk fokus ke area ini" className={`map-validation-badge ${selectedFeature ? 'active' : ''}`}>
                       {selectedFeature ? `Area RT ${formData.rt}/RW ${formData.rw} (Klik)` : '! Batas area tidak ditemukan'}
                     </button>
                     
-                    {/* Tombol Fullscreen */}
                     <button type="button" onClick={() => setIsFullscreen(!isFullscreen)} className="btn-fullscreen" title="Layar Penuh">
                       {isFullscreen ? <ExitFullscreenIcon /> : <FullscreenIcon />}
                     </button>
 
-                    {/* Tombol GPS Current Location */}
                     <button type="button" onClick={flyToGPS} className="btn-gps" title="Gunakan Lokasi GPS Saat Ini">
                       <GPSIcon />
                     </button>
 
-                    <MapContainer 
-                      center={mapPosition} 
-                      zoom={16} 
-                      scrollWheelZoom={true} 
-                      style={{ height: '100%', width: '100%', zIndex: 0 }}
-                      ref={setMapRef}
-                    >
+                    <MapContainer center={mapPosition} zoom={16} scrollWheelZoom={true} style={{ height: '100%', width: '100%', zIndex: 0 }} ref={setMapRef}>
                       <MapResizer isFullscreen={isFullscreen} />
                       
-                      {/* Pilihan Basemap */}
                       <LayersControl position="topright">
-                        <LayersControl.BaseLayer  name="Peta Standar">
-                          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                        </LayersControl.BaseLayer>
-                        <LayersControl.BaseLayer checked name="Satelit">
+                        {/* DEFAULT SATELIT SEKARANG DI ATAS DENGAN TAG 'checked' */}
+                        <LayersControl.BaseLayer checked name="Satelit Google">
                           <TileLayer url="http://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}" />
+                        </LayersControl.BaseLayer>
+                        <LayersControl.BaseLayer name="Peta Standar">
+                          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                         </LayersControl.BaseLayer>
                         <LayersControl.BaseLayer name="Peta Terang">
                           <TileLayer url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png" />
@@ -833,13 +753,8 @@ const FormKuesioner = () => {
                         </LayersControl.BaseLayer>
                       </LayersControl>
                       
-                      {/* Render polygon RT/RW untuk memandu pengguna */}
                       {selectedFeature && (
-                        <GeoJSON 
-                          key={`target-${formData.rt}-${formData.rw}`} 
-                          data={selectedFeature} 
-                          style={{ color: '#ffe16f', weight: 4, fillColor: '#ffe16f', fillOpacity: 0.3 }} 
-                        />
+                        <GeoJSON key={`target-${formData.rt}-${formData.rw}`} data={selectedFeature} style={{ color: '#ffe16f', weight: 4, fillColor: '#ffe16f', fillOpacity: 0.3 }} />
                       )}
                       
                       <LocationMarker position={mapPosition} setPosition={setMapPosition} setFormData={setFormData} />
@@ -863,10 +778,12 @@ const FormKuesioner = () => {
                 <button type="submit" className="btn-primary" 
                   disabled={
                     (step === 1 && !formData.namaPetugas) ||
-                    (step === 2 && (!formData.rt || !formData.rw)) ||
-                    (step === 3 && !previewUsaha) ||
-                    (step === 5 && formData.punyaNib === 'Ya' && !isNibValid) ||
-                    (step === 6 && formData.punyaQris === 'Ya' && !previewQris)
+                    (step === 2 && (!formData.namaPemilik || !formData.alamatPemilik)) ||
+                    (step === 3 && (!formData.namaUsaha || !formData.alamat || !formData.rt || !formData.rw)) ||
+                    (step === 4 && !previewUsaha) ||
+                    (step === 5 && (!formData.kbli || !formData.deskripsiUsaha)) ||
+                    (step === 6 && (!formData.punyaNib || (formData.punyaNib === 'Ya' && !isNibValid) || (formData.punyaNib === 'Tidak' && (!formData.alasanTidakNib || !formData.urusNib)))) ||
+                    (step === 7 && (!formData.punyaQris || (formData.punyaQris === 'Tidak' && !formData.urusQris)))
                   }>
                   Lanjut
                 </button>
@@ -876,20 +793,11 @@ const FormKuesioner = () => {
                 </button>
               )}
             </div>
-              <footer
-                  style={{
-                    marginTop: '24px',
-                    fontSize: '12px',
-                    color: '#6b7280',
-                    textAlign: 'center'
-                  }}
-                >
+            <footer style={{ marginTop: '24px', fontSize: '12px', color: '#6b7280', textAlign: 'center' }}>
               &copy; 2026 Tim Desa Cantik BPS Kabupaten Pacitan
-              <span style={{ color: '#facc15' }}> </span>
             </footer>
           </form>
         </div>
-        
       </div>
     </>
   );

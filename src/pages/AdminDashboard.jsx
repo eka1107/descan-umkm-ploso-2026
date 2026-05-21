@@ -5,7 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import Select from 'react-select'; 
 import L from 'leaflet';
 import plosoGeojson from '../3501040002_Ploso.json';
-import { kbliOptions } from '../dataKbliKategori'; // Pastikan file ini ada
+import { kbliOptions } from '../dataKbliKategori';
 
 // --- KONFIGURASI ICON TITIK Usaha ---
 delete L.Icon.Default.prototype._getIconUrl;
@@ -54,14 +54,12 @@ const isPointInMultiPolygon = (point, geometry) => {
   return inside;
 };
 
-// --- FUNGSI MUNCULKAN FOTO DRIVE ---
 const getDriveImageUrl = (url) => {
   if (!url || url === '-') return null;
   const match = url.match(/id=([a-zA-Z0-9_-]+)/) || url.match(/d\/([a-zA-Z0-9_-]+)/);
   return match ? `https://drive.google.com/thumbnail?id=${match[1]}&sz=w400` : url;
 };
 
-// --- KOMPONEN PETA UNTUK MODAL EDIT ---
 function EditLocationMarker({ position, setPosition, editFeature, openAlert, rtrwData }) {
   const markerRef = useRef(null);
   const map = useMapEvents({
@@ -102,7 +100,6 @@ function EditLocationMarker({ position, setPosition, editFeature, openAlert, rtr
   return posObj ? <Marker draggable={true} eventHandlers={eventHandlers} position={posObj} ref={markerRef} icon={UsahaIcon} /> : null;
 }
 
-// --- KOMPONEN CUSTOM MODAL POP-UP ---
 const CustomModal = ({ isOpen, title, message, type = 'info', onConfirm, onCancel }) => {
   if (!isOpen) return null;
   return (
@@ -119,12 +116,11 @@ const CustomModal = ({ isOpen, title, message, type = 'info', onConfirm, onCance
   );
 };
 
-// --- SVG ICONS ---
 const Icons = {
   Search: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
   Refresh: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 0 20.49 15"/></svg>,
   Edit: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
-  Setting: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.8 1 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+  Setting: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.8 1 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
   Map: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>,
   Database: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19C3 20.6569 7.02944 22 12 22C16.9706 22 21 20.6569 21 19V5"/><path d="M3 12C3 13.6569 7.02944 15 12 15C16.9706 15 21 13.6569 21 12"/></svg>,
   Dashboard: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>,
@@ -137,14 +133,13 @@ const Icons = {
   Plus: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
 };
 
-// --- KOMPONEN ANIMASI ANGKA DARI 0 ---
 const AnimatedNumber = ({ value }) => {
   const [displayValue, setDisplayValue] = React.useState(0);
   React.useEffect(() => {
     let start = 0;
     const end = parseInt(value, 10) || 0;
     if (end === 0) { setDisplayValue(0); return; }
-    const totalDuration = 1200; // durasi animasi 1.2 detik
+    const totalDuration = 1200; 
     const incrementTime = 30;
     const step = Math.max(end / (totalDuration / incrementTime), 1);
     
@@ -272,23 +267,21 @@ const AdminDashboard = () => {
   };
 
   const handleFocusWilayah = () => {
-  // Pastikan editMapRef sudah terhubung ke MapContainer
-  if (!editMapRef || !editUsahaModal.data.RT || !editUsahaModal.data.RW) return;
+    if (!editMapRef || !editUsahaModal.data.RT || !editUsahaModal.data.RW) return;
 
-  // Mencari feature RT/RW yang dipilih
-  const feature = plosoGeojson.features.find(f => {
-    const nmsls = f.properties.nmsls || '';
-    return nmsls.includes(`RT ${String(editUsahaModal.data.RT).padStart(2, '0')}`) && 
-           nmsls.includes(`RW ${String(editUsahaModal.data.RW).padStart(2, '0')}`);
-  });
+    const feature = plosoGeojson.features.find(f => {
+      const nmsls = f.properties.nmsls || '';
+      return nmsls.includes(`RT ${String(editUsahaModal.data.RT).padStart(2, '0')}`) && 
+             nmsls.includes(`RW ${String(editUsahaModal.data.RW).padStart(2, '0')}`);
+    });
 
-  if (feature) {
-    const layer = L.geoJSON(feature);
-    editMapRef.flyToBounds(layer.getBounds(), { padding: [50, 50], duration: 1.2 });
-  } else {
-    alert("Wilayah RT/RW tidak ditemukan di peta.");
-  }
-};
+    if (feature) {
+      const layer = L.geoJSON(feature);
+      editMapRef.flyToBounds(layer.getBounds(), { padding: [50, 50], duration: 1.2 });
+    } else {
+      alert("Wilayah RT/RW tidak ditemukan di peta.");
+    }
+  };
 
   const handleEditFileUpload = (e, type) => {
     const file = e.target.files[0];
@@ -298,11 +291,11 @@ const AdminDashboard = () => {
       reader.onloadend = () => {
         setEditUsahaModal(prev => ({
           ...prev,
-          [type === 'usaha' ? 'previewUsaha' : 'previewQris']: objectUrl, 
+          previewUsaha: objectUrl, // Hanya untuk Foto Usaha
           data: {
             ...prev.data,
-            [type === 'usaha' ? 'fotoUsahaBase64' : 'fotoQrisBase64']: reader.result.split(',')[1],
-            [type === 'usaha' ? 'fotoUsahaMimeType' : 'fotoQrisMimeType']: file.type
+            fotoUsahaBase64: reader.result.split(',')[1],
+            fotoUsahaMimeType: file.type
           }
         }));
       };
@@ -313,7 +306,6 @@ const AdminDashboard = () => {
   const submitEditData = async (e) => {
     e.preventDefault();
     
-    // Validasi NIB
     if (editUsahaModal.data['Punya NIB'] === 'Ya') {
       const nibValue = editUsahaModal.data['Nomor NIB'] || '';
       if (nibValue.length !== 13 || !/^\d+$/.test(nibValue)) {
@@ -322,20 +314,11 @@ const AdminDashboard = () => {
       }
     }
 
-    // TAMBAHKAN INI: Fungsi untuk otomatis mengarahkan peta ke RT/RW yang dipilih
-    const flyToEditRegion = (feature) => {
-      if (editMapRef && feature) {
-        const layer = L.geoJSON(feature);
-        editMapRef.flyToBounds(layer.getBounds(), { padding: [40, 40], duration: 1.2 });
-      }
-    };
-
     setIsLoading(true);
     const updatedData = { ...editUsahaModal.data };
     const oldNama = updatedData.oldNamaUsaha;
     delete updatedData.oldNamaUsaha; 
 
-    // Optimistic Update
     setDataUsaha(prev => prev.map(item => item['Nama Usaha'] === oldNama ? updatedData : item));
 
     try {
@@ -379,7 +362,10 @@ const AdminDashboard = () => {
     const matchQRIS = filterQRIS === '' || item['Punya QRIS'] === filterQRIS;
     const matchKBLI = filterKBLI === '' || item['KBLI'] === filterKBLI;
     const searchLow = searchTableQuery.toLowerCase();
+    
+    // Pencarian sekarang meliputi Nama Pemilik juga
     const matchSearch = item['Nama Usaha']?.toLowerCase().includes(searchLow) || 
+                        item['Nama Pemilik']?.toLowerCase().includes(searchLow) ||
                         item['KBLI']?.toLowerCase().includes(searchLow) ||
                         item['Nama Petugas']?.toLowerCase().includes(searchLow);
     return matchRT && matchRW && matchNIB && matchQRIS && matchKBLI && matchSearch;
@@ -489,7 +475,7 @@ const AdminDashboard = () => {
     <div className="filter-bar">
       <div className="search-wrapper">
         <Icons.Search />
-        <input type="text" className="clean-input" placeholder="Cari Usaha atau Petugas..." value={searchTableQuery} onChange={(e) => setSearchTableQuery(e.target.value)} />
+        <input type="text" className="clean-input" placeholder="Cari Usaha atau Pemilik..." value={searchTableQuery} onChange={(e) => setSearchTableQuery(e.target.value)} />
       </div>
       <select className="clean-input" value={filterRW} onChange={e => { setFilterRW(e.target.value); setFilterRT(''); }}>
         <option value="">Semua RW</option>
@@ -529,57 +515,61 @@ const AdminDashboard = () => {
   );
 
   const KPICards = ({ dataTarget }) => {
-    // State untuk memicu animasi progress bar saat komponen dimuat
-    const [isMounted, setIsMounted] = useState(false);
-    useEffect(() => { setTimeout(() => setIsMounted(true), 100); }, []);
+  // Gunakan state untuk memastikan nilai width terupdate setelah komponen muncul
+  const [width, setWidth] = useState('0%');
 
-    const total = dataTarget.length;
-    const safeTarget = Number(targetUsaha) > 0 ? Number(targetUsaha) : 1;
-    const pctTotal = Math.min((total / safeTarget) * 100, 100).toFixed(1);
-    
-    const countNib = dataTarget.filter(d => d['Punya NIB'] === 'Ya').length;
-    const countQris = dataTarget.filter(d => d['Punya QRIS'] === 'Ya').length;
-    const pctNib = total > 0 ? ((countNib / total) * 100).toFixed(1) : 0;
-    const pctQris = total > 0 ? ((countQris / total) * 100).toFixed(1) : 0;
+  const total = dataTarget.length;
+  const safeTarget = Number(targetUsaha) > 0 ? Number(targetUsaha) : 1;
+  const pctTotal = Math.min((total / safeTarget) * 100, 100).toFixed(1);
+  
+  const countNib = dataTarget.filter(d => d['Punya NIB'] === 'Ya').length;
+  const countQris = dataTarget.filter(d => d['Punya QRIS'] === 'Ya').length;
+  const pctNib = total > 0 ? ((countNib / total) * 100).toFixed(1) : 0;
+  const pctQris = total > 0 ? ((countQris / total) * 100).toFixed(1) : 0;
 
-    return (
-      <section className="kpi-grid" style={{ marginBottom: '32px' }}>
-        <div className="content-card">
-          <div className="kpi-title">TOTAL Usaha DIDATA</div>
-          <div className="kpi-value" style={{ color: '#007D60' }}><AnimatedNumber value={total} /></div>
-          <div className="kpi-label">Dari target estimasi {targetUsaha} usaha.</div>
-          <div className="progress-wrapper">
-            <div className="progress-track"><div className="progress-fill" style={{ width: isMounted ? `${pctTotal}%` : '0%', transition: 'width 1.5s cubic-bezier(0.22, 1, 0.36, 1)' }}></div></div>
-            <div className="progress-text">{pctTotal}%</div>
+  // Efek ini memastikan width berubah dari 0% ke persentase asli saat komponen dimuat
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setWidth(`${pctTotal}%`);
+    }, 300); // Tunggu sedikit agar animasi terlihat
+    return () => clearTimeout(timer);
+  }, [pctTotal]);
+
+  return (
+    <section className="kpi-grid" style={{ marginBottom: '32px' }}>
+      {/* CARD 1 */}
+      <div className="content-card">
+        <div className="kpi-title">TOTAL USAHA DIDATA</div>
+        <div className="kpi-value" style={{ color: '#007D60' }}><AnimatedNumber value={total} /></div>
+        <div className="progress-wrapper">
+          <div className="progress-track">
+            <div className="progress-fill" style={{ width: width }}></div>
           </div>
+          <div className="progress-text">{pctTotal}%</div>
         </div>
-        <div className="content-card">
-          <div className="kpi-title">MEMILIKI LEGALITAS NIB</div>
-          <div className="kpi-value"><AnimatedNumber value={countNib} /></div>
-          <div className="kpi-label">Usaha terdaftar secara resmi.</div>
-          <div className="progress-wrapper">
-            <div className="progress-track"><div className="progress-fill" style={{ width: isMounted ? `${pctNib}%` : '0%', transition: 'width 1.5s cubic-bezier(0.22, 1, 0.36, 1)' }}></div></div>
-            <div className="progress-text">{pctNib}%</div>
+      </div>
+
+      {/* CARD 2 & 3 (Contoh untuk NIB) */}
+      <div className="content-card">
+        <div className="kpi-title">MEMILIKI LEGALITAS NIB</div>
+        <div className="kpi-value"><AnimatedNumber value={countNib} /></div>
+        <div className="progress-wrapper">
+          <div className="progress-track">
+            <div className="progress-fill" style={{ width: `${pctNib}%`, transition: 'width 1.5s ease-out' }}></div>
           </div>
+          <div className="progress-text">{pctNib}%</div>
         </div>
-        <div className="content-card">
-          <div className="kpi-title">MEMILIKI KANAL QRIS</div>
-          <div className="kpi-value"><AnimatedNumber value={countQris} /></div>
-          <div className="kpi-label">Usaha mengadopsi pembayaran digital.</div>
-          <div className="progress-wrapper">
-            <div className="progress-track"><div className="progress-fill" style={{ width: isMounted ? `${pctQris}%` : '0%', transition: 'width 1.5s cubic-bezier(0.22, 1, 0.36, 1)' }}></div></div>
-            <div className="progress-text">{pctQris}%</div>
-          </div>
-        </div>
-      </section>
-    );
-  };
+      </div>
+      {/* ... dst untuk QRIS */}
+    </section>
+  );
+};
+
 
   const MapSection = ({ height }) => (
     <div className="map-container-inner" style={{ height: height }}>
       <MapContainer center={centerPloso} zoom={15} scrollWheelZoom={true} style={{ height: '100%', width: '100%', background: '#1a1a1b' }}>
         <LayersControl position="topright">
-          {/* DEFAULT SATELIT SEKARANG DI ATAS DENGAN TAG 'checked' */}
           <LayersControl.BaseLayer checked name="Satelit Google">
             <TileLayer url="http://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}" />
           </LayersControl.BaseLayer>
@@ -645,7 +635,6 @@ const AdminDashboard = () => {
     </div>
   );
 
-  // --- RENDER UMUM ---
   if (!isLoggedIn) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f9fafb', fontFamily: 'Inter, sans-serif' }}>
@@ -662,7 +651,6 @@ const AdminDashboard = () => {
     );
   }
 
-  // Menyiapkan Variabel untuk Modal Edit agar rapi
   let editActiveFeature = null;
   let editMapCenter = centerPloso;
   if (editUsahaModal.data) {
@@ -712,7 +700,11 @@ const AdminDashboard = () => {
         
         .progress-wrapper { margin-top: 16px; display: flex; align-items: center; gap: 12px; }
         .progress-track { flex: 1; height: 6px; background-color: #f3f4f6; border-radius: 6px; overflow: hidden; }
-        .progress-fill { height: 100%; transition: width 0.5s ease; }
+        .progress-fill { 
+            height: 100%; 
+            transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1); /* Pastikan transisi ini ada */
+            background-color: #007D60; /* Atau sesuaikan warna */
+          }
         .progress-text { font-size: 13px; font-weight: 700; color: #1a1a1b; width: 40px; text-align: right; }
 
         .section-title { font-size: 22px; font-weight: 800; margin: 0 0 8px 0; color: #1a1a1b; letter-spacing: -0.5px; }
@@ -793,7 +785,6 @@ const AdminDashboard = () => {
 
       {/* MODAL EDIT Usaha KHUSUS */}
       {editUsahaModal.isOpen && editUsahaModal.data && (() => {
-        // Mendapatkan batas polygon wilayah RT/RW data terpilih
         const editFeature = plosoGeojson.features.find(f => {
           const rtMatch = (f.properties.nmsls || '').match(/RT\s+0*(\d+)/i);
           const rwMatch = (f.properties.nmsls || '').match(/RW\s+0*(\d+)/i);
@@ -820,19 +811,31 @@ const AdminDashboard = () => {
             <form onSubmit={submitEditData} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', boxSizing: 'border-box' }}>
               <div style={{ padding: '20px 24px', overflowY: 'auto', overflowX: 'hidden', flex: 1, display: 'flex', flexDirection: 'column', gap: '16px', boxSizing: 'border-box' }}>
                 
-                {/* BARIS 1: NAMA USAHA & ALAMAT USAHA */}
+                {/* BARIS 1: NAMA USAHA & NAMA PEMILIK */}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
                   <div style={{ flex: '1 1 200px' }}>
                     <label style={{ fontSize: '12px', fontWeight: 700, marginBottom: '4px', display: 'block' }}>Nama Usaha</label>
                     <input required type="text" className="clean-input" style={{ width: '100%', boxSizing: 'border-box' }} value={editUsahaModal.data['Nama Usaha'] || ''} onChange={e => setEditUsahaModal({ ...editUsahaModal, data: { ...editUsahaModal.data, 'Nama Usaha': e.target.value } })} />
                   </div>
                   <div style={{ flex: '1 1 200px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: 700, marginBottom: '4px', display: 'block' }}>Alamat Usaha</label>
-                    <input required type="text" className="clean-input" style={{ width: '100%', boxSizing: 'border-box' }} value={editUsahaModal.data['Alamat'] || ''} onChange={e => setEditUsahaModal({ ...editUsahaModal, data: { ...editUsahaModal.data, 'Alamat': e.target.value } })} />
+                    <label style={{ fontSize: '12px', fontWeight: 700, marginBottom: '4px', display: 'block' }}>Nama Pemilik</label>
+                    <input required type="text" className="clean-input" style={{ width: '100%', boxSizing: 'border-box' }} value={editUsahaModal.data['Nama Pemilik'] || ''} onChange={e => setEditUsahaModal({ ...editUsahaModal, data: { ...editUsahaModal.data, 'Nama Pemilik': e.target.value } })} />
                   </div>
                 </div>
 
-                {/* BARIS 2: RT, RW, NO HP */}
+                {/* BARIS 2: ALAMAT USAHA & ALAMAT PEMILIK */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                  <div style={{ flex: '1 1 200px' }}>
+                    <label style={{ fontSize: '12px', fontWeight: 700, marginBottom: '4px', display: 'block' }}>Alamat Usaha</label>
+                    <input required type="text" className="clean-input" style={{ width: '100%', boxSizing: 'border-box' }} value={editUsahaModal.data['Alamat'] || ''} onChange={e => setEditUsahaModal({ ...editUsahaModal, data: { ...editUsahaModal.data, 'Alamat': e.target.value } })} />
+                  </div>
+                  <div style={{ flex: '1 1 200px' }}>
+                    <label style={{ fontSize: '12px', fontWeight: 700, marginBottom: '4px', display: 'block' }}>Alamat Pemilik</label>
+                    <input required type="text" className="clean-input" style={{ width: '100%', boxSizing: 'border-box' }} value={editUsahaModal.data['Alamat Pemilik'] || ''} onChange={e => setEditUsahaModal({ ...editUsahaModal, data: { ...editUsahaModal.data, 'Alamat Pemilik': e.target.value } })} />
+                  </div>
+                </div>
+
+                {/* BARIS 3: RT, RW, NO HP */}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
                   <div style={{ flex: '1 1 100px' }}>
                     <label style={{ fontSize: '12px', fontWeight: 700, marginBottom: '4px', display: 'block' }}>RW</label>
@@ -860,7 +863,7 @@ const AdminDashboard = () => {
                   </div>
                 </div>
 
-                {/* BARIS 3: KBLI DROPDOWN LIST FIX & DESKRIPSI USAHA */}
+                {/* BARIS 4: KBLI & DESKRIPSI USAHA */}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
                   <div style={{ flex: '1 1 200px' }}>
                     <label style={{ fontSize: '12px', fontWeight: 700, marginBottom: '4px', display: 'block' }}>KBLI 2025</label>
@@ -877,7 +880,7 @@ const AdminDashboard = () => {
                   </div>
                 </div>
 
-                {/* BARIS 4 & 5: STATUS NIB & STATUS QRIS */}
+                {/* BARIS 5: STATUS NIB & STATUS QRIS */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', background: '#f9fafb', padding: '12px', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     <label style={{ fontSize: '12px', fontWeight: 700 }}>Status NIB</label>
@@ -897,48 +900,30 @@ const AdminDashboard = () => {
                   </div>
                 </div>
 
-                {/* BARIS 6: FOTO VISUAL (DENGAN REAKSI INSTAN) */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                {/* BARIS 6: FOTO VISUAL (HANYA FOTO USAHA) */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
                   <div style={{ border: '1px solid #d1d5db', borderRadius: '6px', padding: '10px' }}>
                     <label style={{ fontSize: '11px', fontWeight: 700, marginBottom: '6px', display: 'flex', justifyContent: 'space-between' }}>
                       Foto Tempat Usaha
                       {editUsahaModal.data['URL Foto Usaha'] && editUsahaModal.data['URL Foto Usaha'] !== '-' && !editUsahaModal.previewUsaha && (
-                        <a href={editUsahaModal.data['URL Foto Usaha']} target="_blank" rel="noreferrer" style={{color: '#007D60', textDecoration: 'none'}}>Asli &nearr;</a>
+                        <a href={editUsahaModal.data['URL Foto Usaha']} target="_blank" rel="noreferrer" style={{color: '#007D60', textDecoration: 'none'}}>Buka</a>
                       )}
                     </label>
                     {editUsahaModal.previewUsaha ? (
-                      <img src={editUsahaModal.previewUsaha} alt="Preview" style={{ width: '100%', height: '90px', objectFit: 'cover', borderRadius: '4px', marginBottom: '6px' }} />
+                      <img src={editUsahaModal.previewUsaha} alt="Preview" style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: '4px', marginBottom: '6px' }} />
                     ) : editUsahaModal.data['URL Foto Usaha'] && editUsahaModal.data['URL Foto Usaha'] !== '-' ? (
-                      <img src={getDriveImageUrl(editUsahaModal.data['URL Foto Usaha'])} onError={(e)=>{e.target.style.display='none'}} alt="Usaha" style={{ width: '100%', height: '90px', objectFit: 'cover', borderRadius: '4px', marginBottom: '6px' }} />
-                    ) : <div style={{ height: '90px', background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', marginBottom: '6px', color: '#9ca3af', fontSize: '11px' }}>Tidak ada foto</div>}
+                      <img src={getDriveImageUrl(editUsahaModal.data['URL Foto Usaha'])} onError={(e)=>{e.target.style.display='none'}} alt="Usaha" style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: '4px', marginBottom: '6px' }} />
+                    ) : <div style={{ height: '140px', background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', marginBottom: '6px', color: '#9ca3af', fontSize: '11px' }}>Tidak ada foto</div>}
                     <input type="file" accept="image/*" style={{ width: '100%', fontSize: '11px' }} onChange={(e) => handleEditFileUpload(e, 'usaha')} />
                   </div>
-
-                  {/* INSTANT APPEAR: Langsung muncul jika value 'Ya' di-klik tanpa nunggu refresh */}
-                  {editUsahaModal.data['Punya QRIS'] === 'Ya' ? (
-                    <div style={{ border: '1px solid #d1d5db', borderRadius: '6px', padding: '10px', animation: 'fadeIn 0.2s ease' }}>
-                      <label style={{ fontSize: '11px', fontWeight: 700, marginBottom: '6px', display: 'flex', justifyContent: 'space-between' }}>
-                        Foto Bukti QRIS
-                        {editUsahaModal.data['URL Foto QRIS'] && editUsahaModal.data['URL Foto QRIS'] !== '-' && !editUsahaModal.previewQris && (
-                          <a href={editUsahaModal.data['URL Foto QRIS']} target="_blank" rel="noreferrer" style={{color: '#007D60', textDecoration: 'none'}}>Asli &nearr;</a>
-                        )}
-                      </label>
-                      {editUsahaModal.previewQris ? (
-                        <img src={editUsahaModal.previewQris} alt="Preview" style={{ width: '100%', height: '90px', objectFit: 'cover', borderRadius: '4px', marginBottom: '6px' }} />
-                      ) : editUsahaModal.data['URL Foto QRIS'] && editUsahaModal.data['URL Foto QRIS'] !== '-' ? (
-                        <img src={getDriveImageUrl(editUsahaModal.data['URL Foto QRIS'])} onError={(e)=>{e.target.style.display='none'}} alt="QRIS" style={{ width: '100%', height: '90px', objectFit: 'cover', borderRadius: '4px', marginBottom: '6px' }} />
-                      ) : <div style={{ height: '90px', background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', marginBottom: '6px', color: '#9ca3af', fontSize: '11px' }}>Tidak ada foto</div>}
-                      <input type="file" accept="image/*" style={{ width: '100%', fontSize: '11px' }} onChange={(e) => handleEditFileUpload(e, 'qris')} />
-                    </div>
-                  ) : <div />}
                 </div>
 
-                {/* BARIS 7: PETA EDIT LOKASI (DEFAULT SATELIT & FLY TO TARGET AREA) */}
+                {/* BARIS 7: PETA EDIT LOKASI */}
                 <div style={{ background: '#f9fafb', padding: '12px', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                     <label style={{ fontSize: '12px', fontWeight: 700, margin: 0 }}>Titik Koordinat (Klik peta untuk ubah)</label>
                     {editFeature && (
-                      <button type="button" onClick={() => flyToEditRegion(editFeature)} style={{ background: '#007D60', color: '#fff', border: 'none', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '700', cursor: 'pointer', transition: '0.2s' }}>
+                      <button type="button" onClick={() => handleFocusWilayah()} style={{ background: '#007D60', color: '#fff', border: 'none', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '700', cursor: 'pointer', transition: '0.2s' }}>
                         🎯 Fokus Wilayah RT {editUsahaModal.data['RT']}
                       </button>
                     )}
@@ -947,7 +932,6 @@ const AdminDashboard = () => {
                   <div style={{ height: '180px', width: '100%', borderRadius: '6px', overflow: 'hidden', border: '1px solid #d1d5db', marginBottom: '8px', zIndex: 1 }}>
                     <MapContainer center={mapCenter} zoom={16} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }} ref={setEditMapRef}>
                       <LayersControl position="topright">
-                        {/* Default Satelit diletakkan paling atas dengan tag 'checked' */}
                         <LayersControl.BaseLayer checked name="Satelit">
                           <TileLayer url="http://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}" />
                         </LayersControl.BaseLayer>
@@ -1197,7 +1181,8 @@ const AdminDashboard = () => {
                         <tr key={idx}>
                           <td style={{ minWidth: '200px' }}>
                             <div style={{ fontWeight: '700', fontSize: '15px', color: '#1a1a1b', marginBottom: '6px' }}>{item['Nama Usaha']}</div>
-                            <div style={{ color: '#4E4E4E', fontSize: '13px', marginBottom: '4px' }}>{item['Alamat']}, RT {item['RT']}/RW {item['RW']}</div>
+                            <div style={{ fontSize: '13px', color: '#4E4E4E', marginBottom: '4px' }}><strong>Pemilik:</strong> {item['Nama Pemilik'] || '-'}</div>
+                            <div style={{ color: '#4E4E4E', fontSize: '13px', marginBottom: '4px' }}><strong>Alamat:</strong> {item['Alamat']}, RT {item['RT']}/RW {item['RW']}</div>
                             <div style={{ color: '#6b7280', fontSize: '12px' }}>Hp: {item['No HP'] || '-'}</div>
                             <div style={{ color: '#6b7280', fontSize: '12px', marginTop: '2px' }}>Agen: {item['Nama Petugas']}</div>
                           </td>
@@ -1222,13 +1207,9 @@ const AdminDashboard = () => {
                           </td>
                           <td style={{ minWidth: '140px' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                              {item['URL Foto Usaha'] !== '-' ? (
+                              {item['URL Foto Usaha'] && item['URL Foto Usaha'] !== '-' ? (
                                 <a href={item['URL Foto Usaha']} target="_blank" rel="noreferrer" className="btn-link"><Icons.ExternalLink /> Foto Tempat</a>
                               ) : <span style={{ fontSize: '12px', color: '#9ca3af' }}>Foto Tempat (-)</span>}
-                              
-                              {item['URL Foto QRIS'] !== '-' ? (
-                                <a href={item['URL Foto QRIS']} target="_blank" rel="noreferrer" className="btn-link"><Icons.ExternalLink /> Foto QRIS</a>
-                              ) : <span style={{ fontSize: '12px', color: '#9ca3af' }}>Foto QRIS (-)</span>}
                             </div>
                           </td>
                           <td style={{ textAlign: 'right', minWidth: '100px' }}>
