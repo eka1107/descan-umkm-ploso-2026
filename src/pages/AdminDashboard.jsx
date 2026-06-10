@@ -158,7 +158,7 @@ const AnimatedNumber = ({ value }) => {
 };
 
 const AdminDashboard = () => {
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0TqenZVn-sDlSklA8eesYb08aE2uE7q9Wnvt5OCw-Y20ABr84PNmuEe4T6Nz-vlNf/exec';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzo3hHwrM-kQIyuPt_8ZZ9dVw_AY8AWD67dMuOaeqZkvy1NcyARg2lCrzjxGHOhgGCt/exec';
   
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [pinInput, setPinInput] = useState('');

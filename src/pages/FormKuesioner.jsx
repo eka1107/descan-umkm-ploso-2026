@@ -155,7 +155,7 @@ function LocationMarker({ position, setPosition, setFormData }) {
 }
 
 const FormKuesioner = () => {
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0TqenZVn-sDlSklA8eesYb08aE2uE7q9Wnvt5OCw-Y20ABr84PNmuEe4T6Nz-vlNf/exec';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzo3hHwrM-kQIyuPt_8ZZ9dVw_AY8AWD67dMuOaeqZkvy1NcyARg2lCrzjxGHOhgGCt/exec';
   
   const [step, setStep] = useState(1);
   const totalSteps = 8;
@@ -239,12 +239,12 @@ const FormKuesioner = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
+    const upperValue = value.toUpperCase();
     // Validasi khusus untuk noHp: Hanya angka
     if (name === 'noHp') {
       const onlyNums = value.replace(/[^0-9]/g, '');
       setFormData(prev => ({ ...prev, noHp: onlyNums }));
-      return; // Berhenti di sini agar tidak mengupdate state dengan format salah
+      return;
     }
 
     if (name === 'rw') {
@@ -300,12 +300,17 @@ const FormKuesioner = () => {
     if (nibRefs.current[focusIndex]) nibRefs.current[focusIndex].focus();
   };
 
-  const isNibValid = formData.punyaNib === 'Ya' ? formData.nomorNib.length === 13 : true;
+  const isNibValid = formData.punyaNib === 'Ya' ? (formData.nomorNib.replace(/\s/g, '') === '9999' || formData.nomorNib.replace(/\s/g, '').length === 13) :true;
 
   const nextStep = (e) => { 
     e.preventDefault(); 
     if (step === 6 && formData.punyaNib === 'Ya' && !isNibValid) {
-      setModal({ isOpen: true, type: 'error', title: 'Format NIB Salah', message: 'Nomor Induk Berusaha (NIB) wajib diisi tepat 13 digit angka.' });
+      setModal({ 
+        isOpen: true, 
+        type: 'error', 
+        title: 'Format NIB Salah', 
+        message: 'Nomor Induk Berusaha (NIB) wajib diisi tepat 13 digit angka, atau tulis 9999 jika tidak hafal.' 
+      });
       return;
     }
     setStep(prev => prev + 1); 
@@ -404,7 +409,7 @@ const FormKuesioner = () => {
         label { display: block; font-size: 13px; font-weight: 700; color: #4b5563; margin-bottom: 6px; }
         .input-group { margin-bottom: 16px; }
         
-        .pintarly-input { width: 100%; padding: 12px 16px; border-radius: 8px; border: 1px solid #d1d5db; background-color: #f9fafb; font-size: 15px; color: #1a1a1b; font-family: 'Inter', sans-serif; box-sizing: border-box; transition: all 0.2s ease; outline: none; appearance: none; }
+        .pintarly-input { width: 100%; padding: 12px 16px; border-radius: 8px; border: 1px solid #d1d5db; background-color: #f9fafb; font-size: 15px; color: #1a1a1b; font-family: 'Inter', sans-serif; box-sizing: border-box; transition: all 0.2s ease; outline: none; appearance: none;text-transform: uppercase }
         .pintarly-input:disabled { background-color: #f3f4f6; cursor: not-allowed; }
         .pintarly-input:focus:not(:disabled) { border-color: #ffe16f; background-color: #ffffff; box-shadow: 0 0 0 4px rgba(255, 225, 111, 0.2); }
         textarea.pintarly-input { min-height: 80px; resize: vertical; }
@@ -535,9 +540,9 @@ const FormKuesioner = () => {
                       maxLength="13" // Maksimal 13 digit
                     />
                     {/* Pesan validasi jika diisi tapi kurang dari 12 digit */}
-                    {formData.noHp.length > 0 && (formData.noHp.length < 12 || formData.noHp.length > 13) && (
+                    {formData.noHp.length > 0 && (formData.noHp.length < 11 || formData.noHp.length > 13) && (
                       <span className="note" style={{ color: '#ef4444' }}>
-                        Nomor HP harus terdiri dari 12 atau 13 digit angka.
+                        Nomor HP harus terdiri dari 11 sampai 13 digit angka.
                       </span>
                     )}
                   </div>
@@ -800,7 +805,7 @@ const FormKuesioner = () => {
                 <button type="submit" className="btn-primary" 
                   disabled={
                     (step === 1 && !formData.namaPetugas) ||
-                    (step === 2 && (!formData.namaPemilik || !formData.alamatPemilik || (formData.noHp !== '' && (formData.noHp.length < 12 || formData.noHp.length > 13)))) ||
+                    (step === 2 && (!formData.namaPemilik || !formData.alamatPemilik || (formData.noHp !== '' && (formData.noHp.length < 11 || formData.noHp.length > 13)))) ||
                     (step === 3 && (!formData.namaUsaha || !formData.alamat || !formData.rt || !formData.rw)) ||
                     (step === 4 && !previewUsaha) ||
                     (step === 5 && (!formData.kbli || !formData.deskripsiUsaha)) ||
