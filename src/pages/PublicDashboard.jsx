@@ -290,7 +290,7 @@ const PublicDashboard = () => {
         {isLoading ? (
           <div style={{ textAlign: 'center', padding: '100px 0', color: '#64748b' }}>
             <div style={{ width: '40px', height: '40px', border: '4px solid #f1f5f9', borderTopColor: '#007D60', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 16px auto' }}></div>
-            Menarik data sensus terbaru...
+            Menarik data terbaru...
             <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
           </div>
         ) : (
@@ -335,7 +335,7 @@ const PublicDashboard = () => {
                 <div id="data-section" style={{ paddingTop: '20px' }}>
                   <div className="section-header">
                     <h2>Transparansi Data & Statistik</h2>
-                    <p>Rangkuman eksekutif hasil sensus ekonomi terpadu yang memetakan legalitas, adopsi digital, dan profil Rukun Warga.</p>
+                    <p>Rangkuman eksekutif hasil pendataan usaha Kelurahan Ploso 2026</p>
                   </div>
 
                   <div className="kpi-grid">
@@ -440,7 +440,7 @@ const PublicDashboard = () => {
               return (
               <div style={{ animation: 'fadeIn 0.4s ease', paddingTop: '24px' }}>
                 <h2 style={{ fontFamily: 'Outfit', fontSize: '32px', margin: '0 0 8px 0', color: '#0f172a' }}>Statistik Usaha</h2>
-                <p style={{ color: '#64748b', margin: '0 0 32px 0', fontSize: '16px' }}>Analisis data agregat hasil Sensus Ekonomi Desa Cantik 2026.</p>
+                <p style={{ color: '#64748b', margin: '0 0 32px 0', fontSize: '16px' }}>Analisis data agregat hasil Pendataan Usaha Kelurahan Ploso 2026.</p>
                 
                 {/* Visualisasi Rasio */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginBottom: '24px' }}>
@@ -579,7 +579,7 @@ const PublicDashboard = () => {
                   <div className="pub-card">
                     <div className="pub-icon"><Icons.File /></div>
                     <div className="pub-info">
-                      <h3>Ringkasan Eksekutif Sensus Ekonomi Desa 2026</h3>
+                      <h3>Ringkasan Eksekutif Pendataan Usaha Kelurahan Ploso 2026</h3>
                       <p>Dokumen komprehensif berisi metodologi, hasil agregat, dan rekomendasi kebijakan berdasarkan data direktori usaha Kelurahan Ploso.</p>
                       <button className="btn-download" onClick={() => alert("Dokumen sedang dalam tahap penyusunan oleh Tim Desa Cantik BPS Pacitan.")}><Icons.Download /> Unduh PDF</button>
                     </div>
