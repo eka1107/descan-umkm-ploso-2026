@@ -59,7 +59,6 @@ const getDriveImageUrl = (url) => {
 // --- FUNGSI FORMAT WHATSAPP (FIXED) ---
 const formatWaNumber = (phone) => {
   if (!phone || String(phone).trim() === '' || String(phone) === '-') return null;
-  // Konversi tipe data ke String dengan pasti, lalu bersihkan selain angka
   let clean = String(phone).replace(/[^0-9]/g, '');
   if (clean.startsWith('0')) { clean = '62' + clean.substring(1); }
   if (clean.length < 10 || clean.length > 15) return null;
@@ -107,6 +106,13 @@ const PublicDashboard = () => {
     }
   };
 
+  const scrollToData = () => {
+    const section = document.getElementById('data-section');
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   // --- FILTER DIREKTORI USAHA ---
   const dataDirektori = dataUsaha.filter(item => {
     const matchSearch = (item['Nama Usaha']?.toLowerCase().includes(searchQuery.toLowerCase()) || item['Nama Pemilik']?.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -117,7 +123,6 @@ const PublicDashboard = () => {
     return matchSearch && matchKategori && matchRw && matchQris;
   });
 
-  // Reset pagination jika filter berubah
   useEffect(() => { setCurrentPage(1); }, [searchQuery, filterKategori, filterRW, filterQris]);
 
   const totalPages = Math.ceil(dataDirektori.length / itemsPerPage);
@@ -135,8 +140,6 @@ const PublicDashboard = () => {
     const name = feature.properties.nmsls || '';
     const rwMatch = name.match(/RW\s+0*(\d+)/i);
     const rw = rwMatch ? String(parseInt(rwMatch[1])).padStart(2, '0') : '';
-    
-    // Highlight area sesuai filter RW di peta
     const isHighlighted = mapFilterRW === '' || mapFilterRW === rw;
     return { 
       fillColor: isHighlighted ? '#007D60' : '#cbd5e1', 
@@ -145,7 +148,6 @@ const PublicDashboard = () => {
     };
   };
 
-  // --- OPSI FILTER ---
   const unikKategori = [...new Set(dataUsaha.map(item => item['KBLI']).filter(Boolean))].sort();
   const unikRW = [...new Set(dataUsaha.map(item => String(item['RW']).padStart(2, '0')).filter(r => r !== '00'))].sort();
 
@@ -165,21 +167,36 @@ const PublicDashboard = () => {
         .nav-btn.active { color: #007D60; }
         .nav-btn.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: #007D60; border-radius: 4px 4px 0 0; }
 
-        .container { max-width: 1280px; margin: 0 auto; padding: 40px 20px; animation: fadeIn 0.5s ease; min-height: 85vh;}
+        .container { max-width: 1280px; margin: 0 auto; padding: 0 20px 60px 20px; animation: fadeIn 0.5s ease; min-height: 85vh;}
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* HERO SECTION */
-        .hero { background: linear-gradient(135deg, #007D60 0%, #045c48 100%); border-radius: 16px; padding: 56px 48px; color: #fff; position: relative; overflow: hidden; box-shadow: 0 12px 32px rgba(0, 125, 96, 0.2); margin-bottom: 32px; }
-        .hero::after { content: ''; position: absolute; top: -50%; right: -10%; width: 500px; height: 500px; background: #ffe16f; border-radius: 50%; opacity: 0.15; filter: blur(50px); }
-        .hero h2 { font-family: 'Outfit'; font-size: 46px; font-weight: 800; margin: 0 0 16px 0; letter-spacing: -1.5px; line-height: 1.1; }
-        .hero p { font-size: 18px; line-height: 1.6; opacity: 0.9; max-width: 700px; margin: 0; }
+        /* HERO SPLIT (LANDING PAGE) */
+        .hero-split { display: flex; align-items: center; justify-content: space-between; gap: 40px; min-height: 80vh; padding: 40px 0; border-bottom: 1px solid #e2e8f0; margin-bottom: 60px;}
+        .hero-text { flex: 1; max-width: 600px; }
+        .hero-badge { display: inline-block; background: #f0fdf4; color: #007D60; padding: 6px 16px; border-radius: 99px; font-size: 13px; font-weight: 700; margin-bottom: 24px; border: 1px solid #bbf7d0; letter-spacing: 0.5px;}
+        .hero-title-main { font-family: 'Outfit'; font-size: 56px; font-weight: 800; color: #0f172a; line-height: 1.1; margin: 0 0 24px 0; letter-spacing: -1.5px;}
+        .hero-subtitle { font-size: 18px; color: #475569; line-height: 1.6; margin: 0 0 32px 0;}
+        
+        .hero-buttons { display: flex; gap: 16px; flex-wrap: wrap; }
+        .btn-hero-primary { background: #007D60; color: #fff; padding: 14px 28px; border-radius: 8px; font-weight: 700; font-size: 16px; border: none; cursor: pointer; transition: 0.2s; box-shadow: 0 8px 16px rgba(0,125,96,0.2); display: flex; align-items: center; gap: 8px; font-family: 'Inter';}
+        .btn-hero-primary:hover { background: #045c48; transform: translateY(-2px); }
+        .btn-hero-secondary { background: #fff; color: #0f172a; padding: 14px 28px; border-radius: 8px; font-weight: 700; font-size: 16px; border: 1px solid #cbd5e1; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px; font-family: 'Inter'; box-shadow: 0 4px 6px rgba(0,0,0,0.02);}
+        .btn-hero-secondary:hover { background: #f8fafc; border-color: #94a3b8; transform: translateY(-2px); }
+
+        .hero-visual { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; }
+        .hero-visual svg { width: 100%; max-width: 500px; height: auto; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.08)); }
+
+        .section-header { text-align: center; margin-bottom: 48px; }
+        .section-header h2 { font-family: 'Outfit'; font-size: 36px; color: #0f172a; margin: 0 0 12px 0; letter-spacing: -1px;}
+        .section-header p { color: #64748b; font-size: 16px; max-width: 600px; margin: 0 auto; line-height: 1.6; }
 
         /* KPI GRID */
-        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-bottom: 32px; }
-        .kpi-card { background: #fff; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.02); display: flex; flex-direction: column; position: relative; overflow: hidden;}
-        .kpi-title { font-size: 13px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-        .kpi-value { font-size: 44px; font-weight: 800; color: #0f172a; line-height: 1; font-family: 'Outfit'; margin-bottom: 8px;}
-        .kpi-desc { font-size: 13px; color: #94a3b8; font-weight: 500;}
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-bottom: 48px; }
+        .kpi-card { background: #fff; padding: 32px 24px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.02); display: flex; flex-direction: column; align-items: center; text-align: center; transition: 0.3s;}
+        .kpi-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.06); border-color: #cbd5e1;}
+        .kpi-title { font-size: 13px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+        .kpi-value { font-size: 56px; font-weight: 800; color: #0f172a; line-height: 1; font-family: 'Outfit'; margin-bottom: 12px;}
+        .kpi-desc { font-size: 14px; color: #94a3b8; font-weight: 500; line-height: 1.5;}
         
         /* CARD USAHA (DIREKTORI) */
         .dir-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
@@ -232,17 +249,24 @@ const PublicDashboard = () => {
         .btn-download { display: inline-flex; align-items: center; gap: 8px; background: #1e293b; color: #fff; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; text-decoration: none; transition: 0.2s;}
         .btn-download:hover { background: #007D60; }
 
+        @media (max-width: 900px) {
+          .hero-split { flex-direction: column; text-align: center; margin-top: 20px; padding: 20px 0 40px 0;}
+          .hero-subtitle { margin: 0 auto 32px auto; }
+          .hero-buttons { justify-content: center; }
+          .hero-visual svg { max-width: 350px; }
+        }
+
         @media (max-width: 768px) {
           .nav-menu { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: #fff; border-top: 1px solid #e2e8f0; box-shadow: 0 -4px 12px rgba(0,0,0,0.05); justify-content: space-around; z-index: 1000; }
           .nav-btn { flex-direction: column; font-size: 10px; gap: 4px; padding: 8px 0; justify-content: center; }
           .nav-btn.active::after { top: 0; bottom: auto; border-radius: 0 0 4px 4px; }
-          .hero { padding: 40px 24px; }
-          .hero h2 { font-size: 32px; }
-          .container { padding-bottom: 80px; }
+          .hero-title-main { font-size: 40px; }
+          .container { padding: 0 20px 80px 20px; }
           .barchart-row { flex-direction: column; align-items: flex-start; gap: 4px;}
           .barchart-label { width: 100%;}
           .barchart-area { width: 100%;}
           .barchart-val { text-align: left;}
+          .pub-card { flex-direction: column; align-items: center; text-align: center;}
         }
       `}</style>
 
@@ -271,49 +295,75 @@ const PublicDashboard = () => {
           </div>
         ) : (
           <>
-            {/* ================= BERANDA ================= */}
+            {/* ================= BERANDA (LANDING PAGE STYLE) ================= */}
             {activeTab === 'beranda' && (
               <div style={{ animation: 'fadeIn 0.4s ease' }}>
-                <div className="hero">
-                  <h2>Katalog Potensi &<br/>UMKM Kelurahan Ploso</h2>
-                  <p>Inovasi keterbukaan informasi publik hasil pendataan terpadu Desa Cinta Statistik (Desa Cantik) 2026. Temukan ragam usaha, produk unggulan, dan analisis potensi ekonomi wilayah kami secara real-time.</p>
+                
+                {/* HERO SPLIT */}
+                <div className="hero-split">
+                  <div className="hero-text">
+                    <div className="hero-badge">Program Desa Cantik 2026</div>
+                    <h1 className="hero-title-main">Selamat Datang di <span style={{ color: '#007D60' }}>Portal Usaha</span> Kelurahan Ploso</h1>
+                    <p className="hero-subtitle">Mendukung pertumbuhan ekonomi lokal melalui keterbukaan informasi publik. Temukan berbagai profil UMKM, produk unggulan desa, dan analisis potensi ekonomi wilayah kami secara interaktif dan real-time.</p>
+                    <div className="hero-buttons">
+                      <button className="btn-hero-primary" onClick={() => setActiveTab('usaha')}><Icons.Store /> Jelajahi Usaha Desa</button>
+                      <button className="btn-hero-secondary" onClick={scrollToData}><Icons.Stats /> Lihat Statistik Data</button>
+                    </div>
+                  </div>
+
+                  {/* ILUSTRASI SVG MODERN */}
+                  <div className="hero-visual">
+                    <svg viewBox="0 0 500 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="250" cy="200" r="180" fill="#f0fdf4"/>
+                      <rect x="130" y="100" width="240" height="260" rx="16" fill="#ffffff" stroke="#cbd5e1" strokeWidth="2"/>
+                      <rect x="130" y="100" width="240" height="90" rx="16" fill="#007D60"/>
+                      <path d="M130 170H370V344C370 352.837 362.837 360 354 360H146C137.163 360 130 352.837 130 344V170Z" fill="#ffffff"/>
+                      <circle cx="250" cy="140" r="24" fill="#ffe16f"/>
+                      <rect x="170" y="210" width="160" height="16" rx="4" fill="#f1f5f9"/>
+                      <rect x="170" y="240" width="100" height="16" rx="4" fill="#f1f5f9"/>
+                      <rect x="170" y="280" width="40" height="40" rx="8" fill="#fcd34d"/>
+                      <rect x="220" y="280" width="40" height="40" rx="8" fill="#a7f3d0"/>
+                      <rect x="270" y="280" width="40" height="40" rx="8" fill="#bae6fd"/>
+                      <circle cx="400" cy="280" r="40" fill="#e2e8f0"/>
+                      <circle cx="400" cy="280" r="20" fill="#cbd5e1"/>
+                      <path d="M50 200 L90 160 L90 240 Z" fill="#e2e8f0"/>
+                    </svg>
+                  </div>
                 </div>
                 
-                <div className="kpi-grid">
-                  <div className="kpi-card">
-                    <span className="kpi-title">Total Usaha Terdata</span>
-                    <span className="kpi-value"><AnimatedNumber value={dataUsaha.length} /></span>
-                    <span className="kpi-desc">Unit usaha mikro hingga menengah.</span>
+                {/* DATA SECTION (Tujuan Scroll) */}
+                <div id="data-section" style={{ paddingTop: '20px' }}>
+                  <div className="section-header">
+                    <h2>Transparansi Data & Statistik</h2>
+                    <p>Rangkuman eksekutif hasil sensus ekonomi terpadu yang memetakan legalitas, adopsi digital, dan profil Rukun Warga.</p>
                   </div>
-                  <div className="kpi-card">
-                    <span className="kpi-title">Usaha Ber-Legalitas (NIB)</span>
-                    <span className="kpi-value" style={{color: '#007D60'}}><AnimatedNumber value={dataUsaha.filter(d => d['Punya NIB'] === 'Ya').length} /></span>
-                    <span className="kpi-desc">Terdaftar resmi di sistem pemerintah.</span>
-                  </div>
-                  <div className="kpi-card">
-                    <span className="kpi-title">Adopsi Digital (QRIS)</span>
-                    <span className="kpi-value" style={{color: '#d97706'}}><AnimatedNumber value={dataUsaha.filter(d => d['Punya QRIS'] === 'Ya').length} /></span>
-                    <span className="kpi-desc">Mendukung transaksi non-tunai.</span>
+
+                  <div className="kpi-grid">
+                    <div className="kpi-card">
+                      <span className="kpi-title">Total Usaha Terdata</span>
+                      <span className="kpi-value"><AnimatedNumber value={dataUsaha.length} /></span>
+                      <span className="kpi-desc">Unit usaha mikro, kecil, dan menengah.</span>
+                    </div>
+                    <div className="kpi-card">
+                      <span className="kpi-title">Usaha Ber-Legalitas (NIB)</span>
+                      <span className="kpi-value" style={{color: '#007D60'}}><AnimatedNumber value={dataUsaha.filter(d => d['Punya NIB'] === 'Ya').length} /></span>
+                      <span className="kpi-desc">Telah terdaftar resmi di sistem OSS.</span>
+                    </div>
+                    <div className="kpi-card">
+                      <span className="kpi-title">Adopsi Digital (QRIS)</span>
+                      <span className="kpi-value" style={{color: '#d97706'}}><AnimatedNumber value={dataUsaha.filter(d => d['Punya QRIS'] === 'Ya').length} /></span>
+                      <span className="kpi-desc">Mendukung ekosistem transaksi non-tunai.</span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="stat-card" style={{ textAlign: 'center', padding: '60px 20px', background: '#fff', border: '1px solid #e2e8f0', backgroundImage: 'radial-gradient(#f1f5f9 2px, transparent 2px)', backgroundSize: '20px 20px' }}>
-                  <div style={{ width: '64px', height: '64px', background: '#007D60', color: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px auto' }}>
-                    <Icons.Store />
-                  </div>
-                  <h3 style={{ fontFamily: 'Outfit', fontSize: '24px', margin: '0 0 12px 0', color: '#0f172a' }}>Jelajahi Etalase Ekonomi Ploso</h3>
-                  <p style={{ color: '#64748b', maxWidth: '600px', margin: '0 auto 32px auto', fontSize: '16px', lineHeight: 1.6 }}>Dukung perekonomian lokal! Lebih dari {dataUsaha.length} usaha warga siap melayani kebutuhan Anda. Hubungi pemilik usaha langsung via WhatsApp.</p>
-                  <button onClick={() => setActiveTab('usaha')} style={{ background: '#1e293b', color: '#fff', border: 'none', padding: '16px 32px', borderRadius: '8px', fontSize: '16px', fontWeight: 700, cursor: 'pointer', fontFamily: 'Inter', transition: '0.2s', boxShadow: '0 8px 16px rgba(0,0,0,0.1)' }}>
-                    Buka Direktori Usaha
-                  </button>
-                </div>
               </div>
             )}
 
             {/* ================= PETA TEMATIK ================= */}
             {activeTab === 'peta' && (
               <div style={{ animation: 'fadeIn 0.4s ease' }}>
-                <div style={{ marginBottom: '24px' }}>
+                <div style={{ marginBottom: '24px', paddingTop: '24px' }}>
                   <h2 style={{ fontFamily: 'Outfit', fontSize: '32px', margin: '0 0 8px 0', color: '#0f172a' }}>Peta Tematik Usaha</h2>
                   <p style={{ color: '#64748b', margin: '0 0 24px 0', fontSize: '16px' }}>Visualisasi geografis distribusi dan konsentrasi UMKM di seluruh area Kelurahan Ploso.</p>
                 </div>
@@ -388,7 +438,7 @@ const PublicDashboard = () => {
               const maxKbli = Math.max(...Object.values(kbliStats), 1);
 
               return (
-              <div style={{ animation: 'fadeIn 0.4s ease' }}>
+              <div style={{ animation: 'fadeIn 0.4s ease', paddingTop: '24px' }}>
                 <h2 style={{ fontFamily: 'Outfit', fontSize: '32px', margin: '0 0 8px 0', color: '#0f172a' }}>Statistik Usaha</h2>
                 <p style={{ color: '#64748b', margin: '0 0 32px 0', fontSize: '16px' }}>Analisis data agregat hasil Sensus Ekonomi Desa Cantik 2026.</p>
                 
@@ -444,7 +494,7 @@ const PublicDashboard = () => {
 
             {/* ================= USAHA DESA (DIREKTORI) ================= */}
             {activeTab === 'usaha' && (
-              <div style={{ animation: 'fadeIn 0.4s ease' }}>
+              <div style={{ animation: 'fadeIn 0.4s ease', paddingTop: '24px' }}>
                 <h2 style={{ fontFamily: 'Outfit', fontSize: '32px', margin: '0 0 8px 0', color: '#0f172a' }}>Direktori Usaha & Produk</h2>
                 <p style={{ color: '#64748b', margin: '0 0 24px 0', fontSize: '16px' }}>Temukan produk, jasa, dan layanan warga. Dukung ekonomi desa dengan bertransaksi langsung!</p>
                 
@@ -519,7 +569,7 @@ const PublicDashboard = () => {
 
             {/* ================= PUBLIKASI ================= */}
             {activeTab === 'publikasi' && (
-              <div style={{ animation: 'fadeIn 0.4s ease' }}>
+              <div style={{ animation: 'fadeIn 0.4s ease', paddingTop: '24px' }}>
                 <h2 style={{ fontFamily: 'Outfit', fontSize: '32px', margin: '0 0 8px 0', color: '#0f172a' }}>Pojok Publikasi</h2>
                 <p style={{ color: '#64748b', margin: '0 0 32px 0', fontSize: '16px' }}>Dokumen resmi, ringkasan eksekutif, dan infografis hasil pelaksanaan program Desa Cantik.</p>
                 
